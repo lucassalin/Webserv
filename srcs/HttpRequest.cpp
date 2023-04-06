@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: lsalin <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 16:49:48 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/06 12:46:34 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/06 15:38:40 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -585,6 +585,8 @@ void	HttpRequest::feed(char *data, size_t size)
 			break;
 		}
 
+		// Host: localhost:8080
+
 		case Field_Name:
 		{
 			if (character == ':')
@@ -618,6 +620,9 @@ void	HttpRequest::feed(char *data, size_t size)
 			break;
 		}
 
+		// '\r' est suivi de '\n' mais on les traite
+		// dans deux case différents
+
 		case Field_Value_End:
 		{
 			if (character == '\n')
@@ -634,6 +639,16 @@ void	HttpRequest::feed(char *data, size_t size)
 			break;
 		}
 
+		// Host: www.example.com
+		// Transfer-Encoding: chunked
+
+		// 25
+		// This is the data in the first chunk
+			
+		// 1C
+		// and this is the second one
+		// 0
+
 		case Chunked_Length_Begin:
 		{
 			if (isxdigit(character) == 0)
@@ -642,16 +657,28 @@ void	HttpRequest::feed(char *data, size_t size)
 				std::cout << "Bad Character (Chunked_Length_Begin)" << std::endl;
 				return;
 			}
-			s.str("");
-			s.clear();
-			s << character;
-			s >> std::hex >> _chunk_length;
+			
+			s.str(""); // on vide le contenu du flux de s pour s'assurer qu'il ne contient pas de précédentes valeurs
+			s.clear(); // clear() pour reinit les indicateurs d'erreurs
+			s << character; // on add le caractère lu depuis la requête à notre string
+			
+			// s >> std::hex configure la stringstream pour qu'elle traite 
+			// le texte suivant comme un nombre hexa
+			// s >> _chunk_length extrait l'hexa de la stringstream et le stocke dans _chunk_length
+
+			s >> std::hex >> _chunk_length; 
+
 			if (_chunk_length == 0)
 				_state = Chunked_Length_CR;
 			else
-				_state = Chunked_Length;
+				_state = Chunked_Length; // on continue à lire
+
 			continue;
 		}
+
+		// La longueur du chunk est encodée en hexa, donc chaque caractère
+		// est encodé en hexa + rajouté au total de la longueur du chunk
+
 		case Chunked_Length:
 		{
 			if (isxdigit(character) != 0)
@@ -661,27 +688,38 @@ void	HttpRequest::feed(char *data, size_t size)
 				s.clear();
 				s << character;
 				s >> std::hex >> temp_len;
-				_chunk_length *= 16;
+				_chunk_length *= 16; // on x16 le nombre hexa pour faire de la place aux bits de poids faible de temp_len
 				_chunk_length += temp_len;
 			}
+
 			else if (character == '\r')
 				_state = Chunked_Length_LF;
+
+			// Le caractère n'est ni un hexa ni CR --> fin du chunk
+			// le prochain caractère est le \n suivant
+			// --> on ignore tous les chars jusqu'à ce \n
+
 			else
 				_state = Chunked_Ignore;
+
 			continue;
 		}
+
 		case Chunked_Length_CR:
 		{
 			if (character == '\r')
 				_state = Chunked_Length_LF;
+
 			else
 			{
 				_error_code = 400;
 				std::cout << "Bad Character (Chunked_Length_CR)" << std::endl;
 				return;
 			}
+
 			continue;
 		}
+
 		case Chunked_Length_LF:
 		{
 			if (character == '\n')
@@ -691,44 +729,58 @@ void	HttpRequest::feed(char *data, size_t size)
 				else
 					_state = Chunked_Data;
 			}
+
 			else
 			{
 				_error_code = 400;
 				std::cout << "Bad Character (Chunked_Length_LF)" << std::endl;
 				return;
 			}
+
 			continue;
 		}
+
 		case Chunked_Ignore:
 		{
 			if (character == '\r')
 				_state = Chunked_Length_LF;
 			continue;
 		}
+
+		// On ajoute le contenu de chaque chunk au body jusqu'à la fin du chunk
+		// Décremente _chunk_length jusqu'à la fin du chunk (== 0)
+
 		case Chunked_Data:
 		{
 			_body.push_back(character);
 			--_chunk_length;
+			
 			if (_chunk_length == 0)
 				_state = Chunked_Data_CR;
+
 			continue;
 		}
+
 		case Chunked_Data_CR:
 		{
 			if (character == '\r')
 				_state = Chunked_Data_LF;
+
 			else
 			{
 				_error_code = 400;
 				std::cout << "Bad Character (Chunked_Data_CR)" << std::endl;
 				return;
 			}
+
 			continue;
 		}
+
 		case Chunked_Data_LF:
 		{
 			if (character == '\n')
 				_state = Chunked_Length_Begin;
+
 			else
 			{
 				_error_code = 400;
@@ -737,6 +789,7 @@ void	HttpRequest::feed(char *data, size_t size)
 			}
 			continue;
 		}
+
 		case Chunked_End_CR:
 		{
 			if (character != '\r')
@@ -745,9 +798,11 @@ void	HttpRequest::feed(char *data, size_t size)
 				std::cout << "Bad Character (Chunked_End_CR)" << std::endl;
 				return;
 			}
+			
 			_state = Chunked_End_LF;
 			continue;
 		}
+
 		case Chunked_End_LF:
 		{
 			if (character != '\n')
@@ -756,14 +811,23 @@ void	HttpRequest::feed(char *data, size_t size)
 				std::cout << "Bad Character (Chunked_End_LF)" << std::endl;
 				return;
 			}
+			
 			_body_done_flag = true;
 			_state = Parsing_Done;
+
 			continue;
 		}
+
+		// Cas où pas de chunk, donc direct body
+
 		case Message_Body:
 		{
+			// Si la taille du body est < taille totale du body
+			// C'est qu'on doit add le caractère actuellement lu au body
+
 			if (_body.size() < _body_length)
 				_body.push_back(character);
+
 			if (_body.size() == _body_length)
 			{
 				_body_done_flag = true;
@@ -771,15 +835,88 @@ void	HttpRequest::feed(char *data, size_t size)
 			}
 			break;
 		}
+
 		case Parsing_Done:
 		{
 			return;
 		}
-		} // end of swtich
+
+		}
 		_storage += character;
 	}
+
+	// Si parsing terminé, on add le contenu du body à body_str
+	// Permet de la traiter + facilement par la suite
+
 	if (_state == Parsing_Done)
 	{
 		_body_str.append((char *)_body.data(), _body.size());
 	}
+}
+
+bool	HttpRequest::parsingCompleted()
+{
+	return (_state == Parsing_Done);
+}
+
+HttpMethod	&HttpRequest::getMethod()
+{
+	return (_method);
+}
+
+std::string &HttpRequest::getPath()
+{
+	return (_path);
+}
+
+std::string &HttpRequest::getQuery()
+{
+	return (_query);
+}
+
+std::string &HttpRequest::getFragment()
+{
+	return (_fragment);
+}
+
+std::string HttpRequest::getHeader(std::string const &name)
+{
+	return (_request_headers[name]);
+}
+
+const std::map<std::string, std::string> &HttpRequest::getHeaders() const
+{
+	return (this->_request_headers);
+}
+
+std::string HttpRequest::getMethodStr()
+{
+	return (_method_str[_method]);
+}
+
+std::string &HttpRequest::getBody()
+{
+	return (_body_str);
+}
+
+std::string     HttpRequest::getServerName()
+{
+	return (this->_server_name);
+}
+
+bool    HttpRequest::getMultiformFlag()
+{
+	return (this->_multiform_flag);
+}
+
+std::string     &HttpRequest::getBoundary()
+{
+	return (this->_boundary);
+}
+
+void    HttpRequest::setBody(std::string body)
+{
+	_body.clear();
+	_body.insert(_body.begin(), body.begin(), body.end());
+	_body_str = body;
 }
