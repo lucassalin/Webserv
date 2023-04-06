@@ -1,0 +1,143 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   HttpRequest.hpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lsalin <marvin@42.fr>                      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/04/05 16:50:27 by lsalin            #+#    #+#             */
+/*   Updated: 2023/04/05 18:29:22 by lsalin           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#ifndef HTTP_REQUEST_HPP
+#define HTTP_REQUEST_HPP
+
+#include "Webserv.hpp"
+
+enum HttpMethod
+{
+	GET,	// GET = 0
+	POST,	// POST = 1
+	DELETE,	// DELETE = 2
+	PUT,	// PUT = 3
+	HEAD,	// HEAD = 4
+	NONE	// NONE = 5
+};
+
+enum ParsingState
+{
+	Request_Line,
+	Request_Line_Post_Put,
+	Request_Line_Method,
+	Request_Line_First_Space,
+	Request_Line_URI_Path_Slash,
+	Request_Line_URI_Path,
+	Request_Line_URI_Query,
+	Request_Line_URI_Fragment,
+	Request_Line_Ver,
+	Request_Line_HT,
+	Request_Line_HTT,
+	Request_Line_HTTP,
+	Request_Line_HTTP_Slash,
+	Request_Line_Major,
+	Request_Line_Dot,
+	Request_Line_Minor,
+	Request_Line_CR,
+	Request_Line_LF,
+	Field_Name_Start,
+	Fields_End,
+	Field_Name,
+	Field_Value,
+	Field_Value_End,
+	Chunked_Length_Begin,
+	Chunked_Length,
+	Chunked_Ignore,
+	Chunked_Length_CR,
+	Chunked_Length_LF,
+	Chunked_Data,
+	Chunked_Data_CR,
+	Chunked_Data_LF,
+	Chunked_End_CR,
+	Chunked_End_LF,
+	Message_Body,
+	Parsing_Done
+};
+
+/**
+ *
+ * - HttpRequest Class will be used to parase and store the request.
+   It gets feeded with the request and will triiger a flag when parasing is finished.
+   - If any error was found in the request, _code will be set to the correct error code.
+**/
+
+class HttpRequest
+{
+	public:
+		HttpRequest();
+		~HttpRequest();
+
+		HttpMethod                                  &getMethod();
+		std::string                                 &getPath();
+		std::string                                 &getQuery();
+		std::string                                 &getFragment();
+		std::string                                 getHeader(std::string const &);
+		const std::map<std::string, std::string>    &getHeaders() const;
+		std::string                                 getMethodStr();
+		std::string                                 &getBody();
+		std::string                                 getServerName();
+		std::string                                 &getBoundary();
+		bool                                        getMultiformFlag();
+		
+		void        setMethod(HttpMethod &);
+		void        setHeader(std::string &, std::string &);
+		void        setMaxBodySize(size_t);
+		void        setBody(std::string name);
+
+		void        feed(char *data, size_t size);
+		bool        parsingCompleted();
+		void        printMessage();
+		void        clear();
+		short       errorCode();
+		bool        keepAlive();
+		void        cutReqBody(int bytes);
+
+	private:
+
+		// URI = http://www.example.com/index.html/search?q=example#chapter1
+	
+		std::string                         _path;		// http://www.example.com/index.html
+		std::string                         _query; 	// search?q=example (optional)
+		std::string                         _fragment;	// #chapter1 (optional)
+	
+		std::map<std::string, std::string>	_request_headers;	// key = nom du header & value = valeur du header
+		std::vector<u_int8_t>               _body; 				// unsigned int de 8 bits par convention
+		std::string                         _boundary;
+		HttpMethod                          _method;
+		std::map<u_int8_t, std::string>     _method_str;		// Les valeurs des méthodes sont associées à des strings (+ pratique)
+		ParsingState                        _state;
+		size_t                              _max_body_size;
+		size_t                              _body_length;
+		short                               _error_code;	// short car max 100-599
+		size_t                              _chunk_length;
+		std::string                         _storage;		// stockage temporaire des données du parsing
+		std::string                         _key_storage;	// stocke temporairement le header name (reinit à chaque nouveau header parsé)
+		short                               _method_index;	// suit le parsing de la méthode
+		u_int8_t                            _ver_major;
+		u_int8_t                            _ver_minor;
+		std::string                         _server_name;
+		std::string                         _body_str;
+		
+		/* flags */
+		bool                                _fields_done_flag;	// True = tous les headers ont été analysés & stockés
+		bool                                _body_flag;			// True = la requête contient un body
+		bool                                _body_done_flag;	// True = le body a été correctement analysé
+		bool                                _complete_flag;		// True = requête entièrement analysée
+		bool                                _chunked_flag;		// True = la requête utilise l'encodage chunk
+		bool                                _multiform_flag;	// True = la requête est au format MIME multipart/form-data
+
+		void	_handle_headers();
+
+};
+
+#endif
