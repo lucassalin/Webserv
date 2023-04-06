@@ -6,7 +6,7 @@
 /*   By: lsalin <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 16:49:48 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/06 15:38:40 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/06 20:53:28 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -869,32 +869,32 @@ std::string &HttpRequest::getPath()
 	return (_path);
 }
 
-std::string &HttpRequest::getQuery()
+std::string	&HttpRequest::getQuery()
 {
 	return (_query);
 }
 
-std::string &HttpRequest::getFragment()
+std::string	&HttpRequest::getFragment()
 {
 	return (_fragment);
 }
 
-std::string HttpRequest::getHeader(std::string const &name)
+std::string	HttpRequest::getHeader(std::string const &name)
 {
 	return (_request_headers[name]);
 }
 
-const std::map<std::string, std::string> &HttpRequest::getHeaders() const
+const std::map<std::string, std::string>	&HttpRequest::getHeaders() const
 {
 	return (this->_request_headers);
 }
 
-std::string HttpRequest::getMethodStr()
+std::string	HttpRequest::getMethodStr()
 {
 	return (_method_str[_method]);
 }
 
-std::string &HttpRequest::getBody()
+std::string	&HttpRequest::getBody()
 {
 	return (_body_str);
 }
@@ -904,19 +904,98 @@ std::string     HttpRequest::getServerName()
 	return (this->_server_name);
 }
 
-bool    HttpRequest::getMultiformFlag()
+bool	HttpRequest::getMultiformFlag()
 {
 	return (this->_multiform_flag);
 }
 
-std::string     &HttpRequest::getBoundary()
+std::string	&HttpRequest::getBoundary()
 {
 	return (this->_boundary);
 }
 
-void    HttpRequest::setBody(std::string body)
+// Remplace le contenu de body_str par le body actuel
+
+void	HttpRequest::setBody(std::string body)
 {
 	_body.clear();
 	_body.insert(_body.begin(), body.begin(), body.end());
 	_body_str = body;
+}
+
+void	HttpRequest::setMethod(HttpMethod & method)
+{
+	_method = method;
+}
+
+void	HttpRequest::setHeader(std::string &name, std::string &value)
+{
+	trimStr(value);
+	toLower(name);
+	_request_headers[name] = value;
+}
+
+void	HttpRequest::setMaxBodySize(size_t size)
+{
+	_max_body_size = size;
+}
+
+// Affiche le contenu complet de la requête
+
+void	HttpRequest::printMessage()
+{
+	std::cout << _method_str[_method] + " " + _path + "?" + _query + "#" + _fragment
+			  + " " + "HTTP/" << _ver_major  << "." << _ver_minor << std::endl;
+
+	// User-Agent:Mozilla/5.0
+	for (std::map<std::string, std::string>::iterator it = _request_headers.begin(); it != _request_headers.end(); ++it)
+	{
+		std::cout << it->first + ":" + it->second << std::endl;
+	}
+
+	// [72, 101, 108, 108, 111] --> "hello"
+	for (std::vector<u_int8_t>::iterator it = _body.begin(); it != _body.end(); ++it)
+	{
+		std::cout << *it;
+	}
+
+	std::cout << std::endl << "END OF BODY" << std::endl;
+	std::cout << "BODY FLAG =" << _body_flag << "  _BOD_done_flag= " << _body_done_flag << "FEIDLS FLAG = " << _fields_done_flag
+			  																								<< std::endl;
+}
+
+// Parcourt les headers de la requête pour extraire les choses importantes
+
+void	HttpRequest::_handle_headers()
+{
+	std::stringstream ss;
+
+	// Si Content-Length --> body forcément
+	if (_request_headers.count("content-length"))
+	{
+		_body_flag = true;
+		ss << _request_headers["content-length"];
+		ss >> _body_length;
+	}
+
+	if ( _request_headers.count("transfer-encoding"))
+	{
+		if (_request_headers["transfer-encoding"].find_first_of("chunked") != std::string::npos)
+			_chunked_flag = true;
+		_body_flag = true;
+	}
+
+	if (_request_headers.count("host"))
+	{
+		size_t pos = _request_headers["host"].find_first_of(':');
+		_server_name = _request_headers["host"].substr(0, pos);
+	}
+
+	if (_request_headers.count("content-type") && _request_headers["content-type"].find("multipart/form-data") != std::string::npos)
+	{
+		size_t pos = _request_headers["content-type"].find("boundary=", 0);
+		if (pos != std::string::npos)
+			this->_boundary = _request_headers["content-type"].substr(pos + 9, _request_headers["content-type"].size());
+		this->_multiform_flag = true;
+	}
 }
