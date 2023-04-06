@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 16:49:48 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/06 10:38:52 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/06 12:46:34 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ HttpRequest::HttpRequest()
 	_query = "";
 	_fragment = "";
 	_body_str = "";
+	
 	_body_length = 0;
 	_storage = "";
 	_key_storage = "";
@@ -150,49 +151,51 @@ void	HttpRequest::feed(char *data, size_t size)
 		switch (_state)
 		{
 
+		// GET /hello.txt HTTP/1.1
+
 		case Request_Line:
 		{
 			if (character == 'G')
 				_method = GET;
+			
+			// "P" = PUT ou POST
 			else if (character == 'P')
 			{
 				_state = Request_Line_Post_Put;
 				break;
 			}
+
 			else if (character == 'D')
 				_method = DELETE;
+
 			else if (character == 'H')
 				_method = HEAD;
+
+			// Sinon erreur 501 ("Not implemented")
 			else
 			{
 				_error_code = 501;
 				std::cout << "Method Error Request_Line and Character is = " << character << std::endl;
 				return;
 			}
+			
+			// Si la methode est correctement reconnue
+			// On passe au traitement de la 2e partie
+			
 			_state = Request_Line_Method;
 			break;
 		}
+
+		// POST ou PUT
 
 		case Request_Line_Post_Put:
 		{
 			if (character == 'O')
 				_method = POST;
+
 			else if (character == 'U')
 				_method = PUT;
-			else
-			{
-				_error_code = 501;
-				std::cout << "Method Error Request_Line and Character is = " << character << std::endl;
-				return;
-			}
-			_method_index++;
-			_state = Request_Line_Method;
-			break;
-		}
-		case Request_Line_Method:
-		{
-			if (character == _method_str[_method][_method_index])
-				_method_index++;
+
 			else
 			{
 				_error_code = 501;
@@ -200,10 +203,33 @@ void	HttpRequest::feed(char *data, size_t size)
 				return;
 			}
 
+			_method_index++;
+			_state = Request_Line_Method;
+
+			break;
+		}
+
+		case Request_Line_Method:
+		{
+			if (character == _method_str[_method][_method_index])
+				_method_index++;
+
+			else
+			{
+				_error_code = 501;
+				std::cout << "Method Error Request_Line and Character is = " << character << std::endl;
+				return;
+			}
+
+			// Check si le nombre de caracteres de la methode correspond
+			// a ce qui est attendu
+			// Espace apres le nom de methode donc on passe a cet etat
+
 			if ((size_t)_method_index == _method_str[_method].length())
 				_state = Request_Line_First_Space;
 			break;
 		}
+
 		case Request_Line_First_Space:
 		{
 			if (character != ' ')
@@ -212,9 +238,13 @@ void	HttpRequest::feed(char *data, size_t size)
 				std::cout << "Bad Character (Request_Line_First_Space)" << std::endl;
 				return;
 			}
+
 			_state = Request_Line_URI_Path_Slash;
 			continue;
 		}
+
+		// GET /hello.txt HTTP/1.1
+
 		case Request_Line_URI_Path_Slash:
 		{
 			if (character == '/')
@@ -230,6 +260,9 @@ void	HttpRequest::feed(char *data, size_t size)
 			}
 			break;
 		}
+
+		// https://www.example.com/search?q=example#results
+
 		case Request_Line_URI_Path:
 		{
 			if (character == ' ')
@@ -239,6 +272,10 @@ void	HttpRequest::feed(char *data, size_t size)
 				_storage.clear();
 				continue;
 			}
+
+			// Query permettent d'add des parametres supplementaires (optionnel)
+			// L'element est separe par sa valeur avec un "="
+
 			else if (character == '?')
 			{
 				_state = Request_Line_URI_Query;
@@ -246,6 +283,10 @@ void	HttpRequest::feed(char *data, size_t size)
 				_storage.clear();
 				continue;
 			}
+
+			// Fragment permettent de pointer vers 
+			// une partie specifique de la ressource
+
 			else if (character == '#')
 			{
 				_state = Request_Line_URI_Fragment;
@@ -253,20 +294,24 @@ void	HttpRequest::feed(char *data, size_t size)
 				_storage.clear();
 				continue;
 			}
+
 			else if (!allowedCharURI(character))
 			{
 				_error_code = 400;
 				std::cout << "Bad Character (Request_Line_URI_Path)" << std::endl;
 				return;
 			}
+
 			else if (i > MAX_URI_LENGTH)
 			{
 				_error_code = 414;
 				std::cout << "URI Too Long (Request_Line_URI_Path)" << std::endl;
 				return;
 			}
+
 			break;
 		}
+
 		case Request_Line_URI_Query:
 		{
 			if (character == ' ')
@@ -276,6 +321,7 @@ void	HttpRequest::feed(char *data, size_t size)
 				_storage.clear();
 				continue;
 			}
+
 			else if (character == '#')
 			{
 				_state = Request_Line_URI_Fragment;
@@ -283,20 +329,24 @@ void	HttpRequest::feed(char *data, size_t size)
 				_storage.clear();
 				continue;
 			}
+
 			else if (!allowedCharURI(character))
 			{
 				_error_code = 400;
 				std::cout << "Bad Character (Request_Line_URI_Query)" << std::endl;
 				return;
 			}
+
 			else if (i > MAX_URI_LENGTH)
 			{
 				_error_code = 414;
 				std::cout << "URI Too Long (Request_Line_URI_Path)" << std::endl;
 				return;
 			}
+
 			break;
 		}
+
 		case Request_Line_URI_Fragment:
 		{
 			if (character == ' ')
@@ -306,20 +356,26 @@ void	HttpRequest::feed(char *data, size_t size)
 				_storage.clear();
 				continue;
 			}
+
 			else if (!allowedCharURI(character))
 			{
 				_error_code = 400;
 				std::cout << "Bad Character (Request_Line_URI_Fragment)" << std::endl;
 				return;
 			}
+
 			else if (i > MAX_URI_LENGTH)
 			{
 				_error_code = 414;
 				std::cout << "URI Too Long (Request_Line_URI_Path)" << std::endl;
 				return;
 			}
+
 			break;
 		}
+
+		// HTTP/1.1
+
 		case Request_Line_Ver:
 		{
 			if (checkUriPos(_path))
@@ -328,15 +384,18 @@ void	HttpRequest::feed(char *data, size_t size)
 				std::cout << "Request URI ERROR: goes before root !!" << std::endl;
 				return;
 			}
+
 			if (character != 'H')
 			{
 				_error_code = 400;
 				std::cout << "Bad Character (Request_Line_Ver)" << std::endl;
 				return;
 			}
+
 			_state = Request_Line_HT;
 			break;
 		}
+
 		case Request_Line_HT:
 		{
 			if (character != 'T')
@@ -345,9 +404,11 @@ void	HttpRequest::feed(char *data, size_t size)
 				std::cout << "Bad Character (Request_Line_HT)" << std::endl;
 				return;
 			}
+
 			_state = Request_Line_HTT;
 			break;
 		}
+
 		case Request_Line_HTT:
 		{
 			if (character != 'T')
@@ -356,9 +417,11 @@ void	HttpRequest::feed(char *data, size_t size)
 				std::cout << "Bad Character (Request_Line_HTT)" << std::endl;
 				return;
 			}
+
 			_state = Request_Line_HTTP;
 			break;
 		}
+
 		case Request_Line_HTTP:
 		{
 			if (character != 'P')
@@ -367,9 +430,13 @@ void	HttpRequest::feed(char *data, size_t size)
 				std::cout << "Bad Character (Request_Line_HTTP)" << std::endl;
 				return;
 			}
+
 			_state = Request_Line_HTTP_Slash;
 			break;
 		}
+
+		// HTTP/1.1
+
 		case Request_Line_HTTP_Slash:
 		{
 			if (character != '/')
@@ -378,9 +445,11 @@ void	HttpRequest::feed(char *data, size_t size)
 				std::cout << "Bad Character (Request_Line_HTTP_Slash)" << std::endl;
 				return;
 			}
+
 			_state = Request_Line_Major;
 			break;
 		}
+
 		case Request_Line_Major:
 		{
 			if (!isdigit(character))
@@ -389,11 +458,13 @@ void	HttpRequest::feed(char *data, size_t size)
 				std::cout << "Bad Character (Request_Line_Major)" << std::endl;
 				return;
 			}
-			_ver_major = character;
 
+			_ver_major = character;
 			_state = Request_Line_Dot;
+
 			break;
 		}
+
 		case Request_Line_Dot:
 		{
 			if (character != '.')
@@ -402,9 +473,11 @@ void	HttpRequest::feed(char *data, size_t size)
 				std::cout << "Bad Character (Request_Line_Dot)" << std::endl;
 				return;
 			}
+
 			_state = Request_Line_Minor;
 			break;
 		}
+
 		case Request_Line_Minor:
 		{
 			if (!isdigit(character))
@@ -413,10 +486,13 @@ void	HttpRequest::feed(char *data, size_t size)
 				std::cout << "Bad Character (Request_Line_Minor)" << std::endl;
 				return;
 			}
+
 			_ver_minor = character;
 			_state = Request_Line_CR;
+
 			break;
 		}
+
 		case Request_Line_CR:
 		{
 			if (character != '\r')
@@ -425,9 +501,11 @@ void	HttpRequest::feed(char *data, size_t size)
 				std::cout << "Bad Character (Request_Line_CR)" << std::endl;
 				return;
 			}
+
 			_state = Request_Line_LF;
 			break;
 		}
+
 		case Request_Line_LF:
 		{
 			if (character != '\n')
@@ -436,55 +514,77 @@ void	HttpRequest::feed(char *data, size_t size)
 				std::cout << "Bad Character (Request_Line_LF)" << std::endl;
 				return;
 			}
+
 			_state = Field_Name_Start;
 			_storage.clear();
+
 			continue;
 		}
+
+		// Host: localhost:8080
+		// User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+
 		case Field_Name_Start:
 		{
 			if (character == '\r')
 				_state = Fields_End;
+
 			else if (isToken(character))
 				_state = Field_Name;
+
 			else
 			{
 				_error_code = 400;
 				std::cout << "Bad Character (Field_Name_Start)" << std::endl;
 				return;
 			}
+
 			break;
 		}
+
 		case Fields_End:
 		{
+			// Fin des headers
+
 			if (character == '\n')
 			{
 				_storage.clear();
 				_fields_done_flag = true;
 				_handle_headers();
-				// if no body then parsing is completed.
+
+				// Si un body est present --> chunk ?
+
 				if (_body_flag == 1)
 				{
 					if (_chunked_flag == true)
 						_state = Chunked_Length_Begin;
+
 					else
 					{
 						_state = Message_Body;
 					}
 				}
+
+				// Si pas de body --> parsing completed
+
 				else
 				{
 					_state = Parsing_Done;
 				}
+
 				continue;
 			}
+
 			else
 			{
 				_error_code = 400;
 				std::cout << "Bad Character (Fields_End)" << std::endl;
 				return;
 			}
+
 			break;
 		}
+
 		case Field_Name:
 		{
 			if (character == ':')
@@ -504,6 +604,7 @@ void	HttpRequest::feed(char *data, size_t size)
 			// if (!character allowed)
 			//  error;
 		}
+
 		case Field_Value:
 		{
 			if (character == '\r')
@@ -516,6 +617,7 @@ void	HttpRequest::feed(char *data, size_t size)
 			}
 			break;
 		}
+
 		case Field_Value_End:
 		{
 			if (character == '\n')
@@ -531,6 +633,7 @@ void	HttpRequest::feed(char *data, size_t size)
 			}
 			break;
 		}
+
 		case Chunked_Length_Begin:
 		{
 			if (isxdigit(character) == 0)
