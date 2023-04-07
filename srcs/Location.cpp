@@ -6,9 +6,9 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:28:18 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/06 09:31:21 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/07 10:50:57 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/Location.hpp"
+#include "Location.hpp"
 

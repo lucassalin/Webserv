@@ -3,12 +3,12 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsalin <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:23:14 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/05 15:23:39 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/07 10:50:55 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/ServerConfig.hpp"
+#include "ServerConfig.hpp"
 
