@@ -6,7 +6,7 @@
 /*   By: lsalin <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:24:47 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/07 14:15:06 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/07 14:21:57 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ class Location
 		std::string					_root;		// chemin absolu
 		bool						_autoindex;	// auto-indexation activé ou non ?
 		std::string					_index;		// nom du fichier à utiliser comme page d'accueil pour la location en question
-		std::vector<short>			_methods;	// GET/POST/DELETE/PUT/HEAD
+		std::vector<short>			_methods;	// GET + POST + DELETE + PUT + HEAD
 		std::string					_return;	// remplacement où renvoyer la requête pour cette location
 		std::string					_alias;
 		std::vector<std::string>	_cgi_path;
