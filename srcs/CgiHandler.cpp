@@ -6,7 +6,7 @@
 /*   By: lsalin <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 11:01:04 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/07 13:51:53 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/07 21:36:33 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,7 +167,6 @@ void	CgiHandler::initEnvCgi(HttpRequest& req, const std::vector<Location>::itera
 	this->_argv[1] = strdup(this->_cgi_path.c_str());
 	this->_argv[2] = NULL;
 }
-
 
 /* initialization environment variable */
 void CgiHandler::initEnv(HttpRequest& req, const std::vector<Location>::iterator it_loc)
