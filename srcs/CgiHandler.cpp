@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: lsalin <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 11:01:04 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/07 12:04:22 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/07 13:51:53 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,13 @@ const std::string	&CgiHandler::getCgiPath() const
 }
 
 //----------------------------------------------------------------------------//
+
+/**
+ @brief Initialise les variables d'environnement nécessaires à l'exécution du script CGI
+
+ @param req 
+ @param it_loc 
+ */
 
 void	CgiHandler::initEnvCgi(HttpRequest& req, const std::vector<Location>::iterator it_loc)
 {
