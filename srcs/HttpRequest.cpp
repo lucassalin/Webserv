@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HttpRequest.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsalin <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 16:49:48 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/06 20:53:28 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/07 10:37:46 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -974,6 +974,8 @@ void	HttpRequest::_handle_headers()
 	if (_request_headers.count("content-length"))
 	{
 		_body_flag = true;
+		// Extrait "content-length" du header et la stocke dans le flux
+		// pour ensuite la convertir en entier et la stocker dans _body_length
 		ss << _request_headers["content-length"];
 		ss >> _body_length;
 	}
@@ -985,17 +987,76 @@ void	HttpRequest::_handle_headers()
 		_body_flag = true;
 	}
 
+	// Host: www.example.com
+
 	if (_request_headers.count("host"))
 	{
 		size_t pos = _request_headers["host"].find_first_of(':');
 		_server_name = _request_headers["host"].substr(0, pos);
 	}
 
-	if (_request_headers.count("content-type") && _request_headers["content-type"].find("multipart/form-data") != std::string::npos)
+	// Content-Type: multipart/form-data; boundary=---------------------------12345abcdef
+
+	if (_request_headers.count("content-type")
+		&& _request_headers["content-type"].find("multipart/form-data") != std::string::npos)
 	{
 		size_t pos = _request_headers["content-type"].find("boundary=", 0);
+		
 		if (pos != std::string::npos)
 			this->_boundary = _request_headers["content-type"].substr(pos + 9, _request_headers["content-type"].size());
+		
 		this->_multiform_flag = true;
 	}
+}
+
+short	HttpRequest::errorCode()
+{
+	return (this->_error_code);
+}
+
+// Réinitialise les variables pour pouvoir recevoir une nouvelle requête
+
+void HttpRequest::clear()
+{
+	_path.clear();
+	_error_code = 0;
+	_query.clear();
+	_fragment.clear();
+	_method = NONE;
+	_method_index = 1;
+	_state = Request_Line;
+	_body_length = 0;
+	_chunk_length = 0x0;
+	_storage.clear();
+	_body_str = "";
+	_key_storage.clear();
+	_request_headers.clear();
+	_server_name.clear();
+	_body.clear();
+	_boundary.clear();
+	_fields_done_flag = false;
+	_body_flag = false;
+	_body_done_flag = false;
+	_complete_flag = false;
+	_chunked_flag = false;
+	_multiform_flag = false;
+}
+
+// --------------------------------------------------------------------------------------------------//
+
+/* Checks the value of header "Connection". If keep-alive, don't close the connection. */
+
+bool HttpRequest::keepAlive()
+{
+	if (_request_headers.count("connection"))
+	{
+		if (_request_headers["connection"].find("close", 0) != std::string::npos)
+			return (false);
+	}
+	return (true);
+}
+
+void HttpRequest::cutReqBody(int bytes)
+{
+	_body_str = _body_str.substr(bytes);
 }
