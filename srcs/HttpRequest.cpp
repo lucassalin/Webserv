@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 16:49:48 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/07 10:37:46 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/07 10:48:11 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1044,9 +1044,17 @@ void HttpRequest::clear()
 
 // --------------------------------------------------------------------------------------------------//
 
-/* Checks the value of header "Connection". If keep-alive, don't close the connection. */
+/**
+ @brief Vérifie si le header "Connection" est present dans la requete, et si sa valeur est "close"
+		Si c'est le cas, la connexion doit etre fermee apres la reponse
+		
+ @example Connection: keep-alive
+		  Connection: close
 
-bool HttpRequest::keepAlive()
+ @return false si la connexion doit etre fermee, sinon true pour la maintenir
+*/
+
+bool	HttpRequest::keepAlive()
 {
 	if (_request_headers.count("connection"))
 	{
@@ -1056,7 +1064,11 @@ bool HttpRequest::keepAlive()
 	return (true);
 }
 
-void HttpRequest::cutReqBody(int bytes)
+// Coupe une partie du body en fonction du nombre de bytes passes en parametre
+// Est utile si on ne veut pas envoyer la requete entiere
+// Par exemple une grande requete qu'on veut envoyer en plusieurs parties
+
+void	HttpRequest::cutReqBody(int bytes)
 {
 	_body_str = _body_str.substr(bytes);
 }
