@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 11:00:47 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/07 11:15:24 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/07 11:25:22 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,12 @@ class CgiHandler
 		pid_t								_cgi_pid;
 
 	public:
+		
+		// Le script CGI utilise pipe_in[0] pour lire les donnees envoyees par le serveur
+		// Ecrit les resultats dans pipe_out[1]
+		// Le serveur lire les donnees dans pipe_out[0] et ecrit le resultat dans
+		// pipe_in[1]
+
 		int	pipe_in[2];
 		int	pipe_out[2];
 
@@ -45,7 +51,7 @@ class CgiHandler
 		void 		sendHeaderBody(int &pipe_out, int &fd, std::string &);
 		void 		fixHeader(std::string &header);
 		void		clear();
-		
+
 		std::string setCookie(const std::string& str);
 
 		void 		setCgiPid(pid_t cgi_pid);
