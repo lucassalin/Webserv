@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:22:41 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/08 15:17:29 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/08 15:38:49 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,20 +19,24 @@ static std::string	serverParametrs[] = {"server_name", "listen", "root", "index"
 
 class Location;
 
+// Stocke et gére la configuration du serveur web
+
 class ServerConfig
 {
 	private:
+		// nᵒ de port sur lequel le serveur ecoute les connexions entrantes
+		// uint16_t car les nᵒ de ports valides vont de 0 à 65535
 		uint16_t						_port;
-		in_addr_t						_host;
+		in_addr_t						_host; // adresse IP de la machine sur laquelle le serveur s'execute
 		std::string						_server_name;
-		std::string						_root;
+		std::string						_root; // repertoire racine du serveur
 		unsigned long					_client_max_body_size;
-		std::string						_index;
-		bool							_autoindex;
-		std::map<short, std::string>	_error_pages;
-		std::vector<Location> 			_locations;
-        struct sockaddr_in 				_server_address;
-        int     						_listen_fd;
+		std::string						_index; // nom du fichier index par defaut
+		bool							_autoindex; 
+		std::map<short, std::string>	_error_pages; // stocke les pages d'erreur pour chaque code d'etat HTTP
+		std::vector<Location> 			_locations; // configurations de l'emplacement associees au serveur
+		struct sockaddr_in 				_server_address; // stocke les infos de l'adresse du serveur
+		int								_listen_fd; // fd pour la socket d'ecoute du serveur
 
 	public:
 		ServerConfig();
@@ -90,7 +94,7 @@ class ServerConfig
 		};
 
 		void	setupServer();
-        int     getFd();
+		int		getFd();
 };
 
 #endif
