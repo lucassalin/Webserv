@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Mime.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsalin <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:25:01 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/05 15:25:01 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/08 14:51:54 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,18 @@
 
 #include "Webserv.hpp"
 
+// Fournit une correspondance entre les extensions de fichiers 
+// et les types MIME correspondants
+
 class Mime
 {
-    public:
-        Mime();
-        std::string getMimeType(std::string extension);
-    private:
-        std::map<std::string, std::string> _mime_types;
-        
+	public:
+		Mime();
+		std::string	getMimeType(std::string extension);
+
+	private:
+		std::map<std::string, std::string>	_mime_types;
+		
 };
 
 #endif
