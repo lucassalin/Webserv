@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ServerConfig.hpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsalin <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:22:41 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/05 15:24:25 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/08 15:17:29 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,6 @@ class ServerConfig
 
 		void	setupServer();
         int     getFd();
-
 };
 
 #endif
