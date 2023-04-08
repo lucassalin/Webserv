@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsalin <marvin@42.fr>                      +#+  +:+       +#+        */
+/*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 11:01:04 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/07 21:36:33 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/08 13:29:08 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,39 +105,54 @@ const std::string	&CgiHandler::getCgiPath() const
 //----------------------------------------------------------------------------//
 
 /**
- @brief Initialise les variables d'environnement nécessaires à l'exécution du script CGI
+ @brief Initialise les variables d'environnement nécessaires 
+ 		à l'exécution du script CGI situees dans cgi-bin 
 
- @param req 
- @param it_loc 
+ @param req : reference sur un objet HttpRequest
+ @param it_loc : iterateur vers un objet Location
  */
 
 void	CgiHandler::initEnvCgi(HttpRequest& req, const std::vector<Location>::iterator it_loc)
 {
-	std::string	cgi_exec = ("cgi-bin/" + it_loc->getCgiPath()[0]).c_str();
-	char		*cwd = getcwd(NULL, 0);
-	
-	if(_cgi_path[0] != '/')
+	std::string	cgi_exec = ("cgi-bin/" + it_loc->getCgiPath()[0]).c_str(); // cgi-bin/script.cgi
+	char		*cwd = getcwd(NULL, 0); // /homes/lsalin/serveur/cgi-bin/script.cgi
+
+	// Cas du path qui n'est pas absolu
+
+	// _cgi_path	= script.cgi
+	// cwd			= /usr/local/www
+	// tmp			= /usr/local/www/
+	// path absolu	= /usr/local/www/script.cgi
+
+	if (_cgi_path[0] != '/')
 	{
-		std::string tmp(cwd);
+		std::string	tmp(cwd);
 		tmp.append("/");
+
 		if(_cgi_path.length() > 0)
 			_cgi_path.insert(0, tmp);
 	}
-	
-	if(req.getMethod() == POST)
+
+	// POST = datas dans le body
+	// Notre script CGI doit etre capable de les recuperer via l'env
+	// On en init deux : CONTENT_LENGTH (longueur body) et CONTENT_TYPE (type du contenu du body)
+
+	if (req.getMethod() == POST)
 	{
-		std::stringstream out;
+		std::stringstream	out;
 		out << req.getBody().length();
+
+		// Creation de deux variables d'env
 		this->_env["CONTENT_LENGTH"] = out.str();
 		this->_env["CONTENT_TYPE"] = req.getHeader("content-type");
 	}
 
-    this->_env["GATEWAY_INTERFACE"] = std::string("CGI/1.1");
-	this->_env["SCRIPT_NAME"] = cgi_exec;//
+    this->_env["GATEWAY_INTERFACE"] = std::string("CGI/1.1"); // ve de l'interface CGI compatible avec serveur
+	this->_env["SCRIPT_NAME"] = cgi_exec;
     this->_env["SCRIPT_FILENAME"] = this->_cgi_path;
-    this->_env["PATH_INFO"] = this->_cgi_path;//
-    this->_env["PATH_TRANSLATED"] = this->_cgi_path;//
-    this->_env["REQUEST_URI"] = this->_cgi_path;//
+    this->_env["PATH_INFO"] = this->_cgi_path;
+    this->_env["PATH_TRANSLATED"] = this->_cgi_path;
+    this->_env["REQUEST_URI"] = this->_cgi_path;		// URL complet de la requete
     this->_env["SERVER_NAME"] = req.getHeader("host");
     this->_env["SERVER_PORT"] ="8002";
     this->_env["REQUEST_METHOD"] = req.getMethodStr();
@@ -147,33 +162,51 @@ void	CgiHandler::initEnvCgi(HttpRequest& req, const std::vector<Location>::itera
 
 	std::map<std::string, std::string> request_headers = req.getHeaders();
 
+	// Parcourt tous les headers de la requete
+	// Et les ajoute aux variables d'environnement du script
+
 	for(std::map<std::string, std::string>::iterator it = request_headers.begin();
 		it != request_headers.end(); ++it)
 	{
 		std::string name = it->first;
+		// nom du header en majuscule car syntaxe variable d'env
 		std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+		// si name = user-agent, key = HTTP_USER-AGENT (convention)
 		std::string key = "HTTP_" + name;
-		_env[key] = it->second;
+		_env[key] = it->second; // ajoute la valeur du header aux variables d'env
 	}
+
+	// calloc car init la zone memoire a 0
 	this->_ch_env = (char **)calloc(sizeof(char *), this->_env.size() + 1);
-	std::map<std::string, std::string>::const_iterator it = this->_env.begin();
+	std::map<std::string, std::string>::const_iterator	it = this->_env.begin();
+
+	// Creer un tableau de strings contenant les variables d'env au format "name=valeur"
+	// "CONTENT_LENGTH=10" ; "GATEWAY_INTERFACE=CGI/1.1" ...
+
 	for (int i = 0; it != this->_env.end(); it++, i++)
 	{
 		std::string tmp = it->first + "=" + it->second;
 		this->_ch_env[i] = strdup(tmp.c_str());
 	}
+
+	// argv[0] = path d'acces au fichier executable du script
+	// argv[1] = path d'acces au script
+	// argv[2] = fin de la liste donc NULL
+
 	this->_argv = (char **)malloc(sizeof(char *) * 3);
 	this->_argv[0] = strdup(cgi_exec.c_str());
 	this->_argv[1] = strdup(this->_cgi_path.c_str());
 	this->_argv[2] = NULL;
 }
 
-/* initialization environment variable */
-void CgiHandler::initEnv(HttpRequest& req, const std::vector<Location>::iterator it_loc)
+// Initialise l'env pour les scripts CGI situes dans les emplacements specifies par les blocs
+// "location" dans le fichier de config
+
+void	CgiHandler::initEnv(HttpRequest& req, const std::vector<Location>::iterator it_loc)
 {
-	int			poz;
-	std::string extension;
-	std::string ext_path;
+	int			poz;		// stocke la position de la sous-chaine "cgi-bin/"" dans _cgi_path
+	std::string extension;	// stocke l'extension du fichier de config CGI (.py)
+	std::string ext_path;	// path du fichier de config CGI
 
 	extension = this->_cgi_path.substr(this->_cgi_path.find("."));
 	std::map<std::string, std::string>::iterator it_path = it_loc->_ext_path.find(extension);
