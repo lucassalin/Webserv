@@ -6,9 +6,11 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 10:49:55 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/08 14:48:02 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/10 14:20:10 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
+
+Mime Response::_mime;
 

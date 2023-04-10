@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 10:51:57 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/08 15:17:04 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/10 14:19:38 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ class Response
 		Response(HttpRequest&);
 		~Response();
 
-		std::string     getRes();
+		std::string		getRes();
 		size_t			getLen() const;
 		int				getCode() const;
 
@@ -48,35 +48,36 @@ class Response
 
 	private:
 		ServerConfig			_server;
-		std::string				_target_file;
+		std::string				_target_file;	// fichier demande par le client
 		std::vector<uint8_t>	_body;
 		size_t					_body_length;
 		std::string				_response_body;
-		std::string				_location;
-		short					_code;
-		char					*_res;
-		int						_cgi;
+		std::string				_location;		// location correspondante a la requete
+		short					_code;			// code de reponse HTTP
+		char					*_res;			// contient la reponse
+
+		int						_cgi;			// = 1 --> la reponse a la requete doit etre generee par un script CGI
 		int						_cgi_fd[2];
 		size_t					_cgi_response_length;
-		bool					_auto_index;
+		bool					_auto_index;	// true = autoindexation activee
 
-		int     buildBody();
-		size_t  file_size();
-		void    setStatusLine();
-		void    setHeaders();
-		void    setServerDefaultErrorPages();
-		int     readFile();
-		void    contentType();
-		void    contentLength();
-		void    connection();
-		void    server();
-		void    location();
-		void    date();
-		int     handleTarget();
-		void    buildErrorBody();
-		bool    reqError();
-		int     handleCgi(std::string &);
-		int     handleCgiTemp(std::string &);
+		int		buildBody();
+		size_t	file_size();
+		void	setStatusLine();
+		void	setHeaders();
+		void	setServerDefaultErrorPages();
+		int		readFile();
+		void	contentType();
+		void	contentLength();
+		void	connection();
+		void	server();
+		void	location();
+		void	date();
+		int		handleTarget();
+		void	buildErrorBody();
+		bool	reqError();
+		int		handleCgi(std::string &);
+		int		handleCgiTemp(std::string &);
 };
 
 #endif
