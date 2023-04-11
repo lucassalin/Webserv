@@ -6,7 +6,7 @@
 /*   By: lsalin <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:09:07 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/11 18:28:27 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/11 19:18:57 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 #include "Response.hpp"
 
 /**
- @brief Responsable du fonctionnement principal du serveur web
+ @brief Responsable du fonctionnement principal du/des serveur(s) web
  		1) Gére les connexions TCP et la communication serveur-clients
 		2) Configure le serveur via le fichier de config
 		3) Gére les requêtes entrantes/sortantes pour chaque client connecté
@@ -38,7 +38,7 @@ class ServerManager
 		std::map<int, Client>		_clients_map;	// associe un fd à un objet Client
 		fd_set						_recv_fd_pool;	// ensemble de fd pour les sockets en attente de lecture
 		fd_set						_write_fd_pool;	// ensemble de fd pour les sockets en attente d'écriture
-		int							_biggest_fd;	// plus grand fd actuellement utilisé par le programme
+		int							_biggest_fd;	// nombre max de fd à surveiller par select()
 
 		void	acceptNewConnection(ServerConfig &);
 		void	checkTimeout();
