@@ -6,7 +6,7 @@
 /*   By: lsalin <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 15:03:26 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/11 15:15:10 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/11 15:16:07 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,6 @@ const time_t	&Client::getLastTime() const
 {
 	return (_last_msg_time);
 }
-
 
 void	Client::buildResponse()
 {

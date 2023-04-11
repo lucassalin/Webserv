@@ -6,9 +6,12 @@
 /*   By: lsalin <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:05:48 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/11 15:00:00 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/11 18:29:02 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerManager.hpp"
+
+ServerManager::ServerManager() {}
+ServerManager::~ServerManager() {}
 

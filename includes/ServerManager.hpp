@@ -6,7 +6,7 @@
 /*   By: lsalin <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:09:07 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/05 15:22:00 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/11 18:28:27 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,11 +34,11 @@ class ServerManager
 
 	private:
 		std::vector<ServerConfig>	_servers;
-		std::map<int, ServerConfig>	_servers_map;
-		std::map<int, Client>		_clients_map;
-		fd_set						_recv_fd_pool;
-		fd_set						_write_fd_pool;
-		int							_biggest_fd;
+		std::map<int, ServerConfig>	_servers_map;	// associe un fd à la config de son serveur correspondant
+		std::map<int, Client>		_clients_map;	// associe un fd à un objet Client
+		fd_set						_recv_fd_pool;	// ensemble de fd pour les sockets en attente de lecture
+		fd_set						_write_fd_pool;	// ensemble de fd pour les sockets en attente d'écriture
+		int							_biggest_fd;	// plus grand fd actuellement utilisé par le programme
 
 		void	acceptNewConnection(ServerConfig &);
 		void	checkTimeout();
