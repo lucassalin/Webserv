@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 16:49:48 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/07 10:51:24 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/11 11:36:29 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,8 +131,6 @@ void	toLower(std::string &str)
 	for (size_t i = 0; i < str.length(); ++i)
 		str[i] = std::tolower(str[i]);
 }
-
-//-------------------------------------------------------------------------------------//
 
 // Parse les datas HTTP recues par le serveur
 // Est call a chaque fois qu'un nouveau morceau de datas est recu
