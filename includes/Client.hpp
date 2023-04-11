@@ -6,7 +6,7 @@
 /*   By: lsalin <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/10 14:11:05 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/11 15:03:30 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/11 15:11:06 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,8 @@
 #include "HttpRequest.hpp"
 #include "Response.hpp"
 
-/**
-	 Client
-   - Stores all information related to the client such as socket and address
-	 along with request and response objects. each Client also have an object of the server it's conntected to.
-**/
+// Stocke toutes les informations relatives au client (socket, adresses...)
+// Chaque client a un objet du serveur auquel il est connecté
 
 class Client
 {
@@ -29,30 +26,29 @@ class Client
 		Client();
 		Client(const Client &other);
 		Client(ServerConfig &);
-			Client &operator=(const Client & rhs);
+		Client	&operator=(const Client & rhs);
 		~Client();
 
-		const int                 &getSocket() const;
-		const struct sockaddr_in  &getAddress() const;
-		const HttpRequest         &getRequest() const;
-		const time_t              &getLastTime() const;
+		const int					&getSocket() const;
+		const struct sockaddr_in	&getAddress() const;
+		const HttpRequest			&getRequest() const;
+		const time_t				&getLastTime() const;
 
-		void                setSocket(int &);
-		void                setAddress(sockaddr_in &);
-		void                setServer(ServerConfig &);
-		void                buildResponse();
-		void                updateTime();
+		void						setSocket(int &);
+		void						setAddress(sockaddr_in &);
+		void						setServer(ServerConfig &);
+		void						buildResponse();
+		void						updateTime();
 
-		void                clearClient();
-		Response            response;
-		HttpRequest         request;
-		ServerConfig        server;
+		void						clearClient();
+		Response					response;
+		HttpRequest					request;
+		ServerConfig				server; // configuration du serveur utilisée par le client
 
 	private:
-		int                 _client_socket;
-		struct sockaddr_in  _client_address;
-		time_t              _last_msg_time;
+		int							_client_socket;
+		struct sockaddr_in			_client_address;
+		time_t						_last_msg_time; // dernière fois que le serveur a reçu un msg provenant du client
 };
 
-
-#endif // CLIENT_HPP
+#endif
