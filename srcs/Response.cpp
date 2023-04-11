@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
+/*   By: lsalin <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 10:49:55 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/11 11:24:57 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/11 14:57:39 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,7 +161,7 @@ static bool	isDirectory(std::string path)
 	return (S_ISDIR(file_stat.st_mode));
 }
 
-// Check si la methode utilisee est autorisee en fonction de sa location
+// Check si la methode utilisee est autorisee en fonction de son emplacement
 // Retourne true + affecte 405 ("Method Not Allowed") a code si pas autorisee
 // Renvoie false sinon
 
@@ -252,7 +252,9 @@ static void	appendRoot(Location &location, HttpRequest &request, std::string &ta
 	target_file = combinePaths(location.getRootLocation(), request.getPath(), "");
 }
 
-// Est call lorsque la ressource demandée nécessite l'exécution d'un script CGI
+// Initialise les variables d'env requises à l'exe du script CGI
+// Et l'execute
+// Est call lorsque la ressource demandée nécessite l'execution d'un script CGI
 
 int	Response::handleCgiTemp(std::string &location_key)
 {
@@ -278,17 +280,28 @@ int	Response::handleCgiTemp(std::string &location_key)
 	return (0);
 }
 
+/**
+	@brief Gére l'exe du script CGI lorsqu'une requête est envoyée à notre serveur web
+
+	@example emplacement = /var/www/html ; location_key = html
+
+	@return (0) si réussite du script, (1) si échec
+ */
+
 int	Response::handleCgi(std::string &location_key)
 {
 	std::string path;
 	std::string exten;
-	size_t      pos;
+	size_t		pos;
 
 	path = this->request.getPath();
 
+	// si le premier char existe et que c'est "/", on l'enlève
 	if (path[0] && path[0] == '/')
 		path.erase(0, 1);
 
+	// si la requête doit être traitée par un CGI
+	// on ajoute sa localisation spécifique sur le serveur web
 	if (path == "cgi-bin")
 		path += "/" + _server.getLocationKey(location_key)->getIndexLocation();
 
@@ -343,16 +356,27 @@ int	Response::handleCgi(std::string &location_key)
 }
 
 /**
-	@brief Compare l'URI avec les emplacements du fichier de config et essaie de trouver la meilleure
-	correspondance.
-	Si une correpondance est trouvee, alors location_key est defini sur cet emplacement
-	Sinon elle est vide
-	
-	@param path : path de la requete
-	@param locations : vecteur d'objets Location, contient la configuration des emplacements
-	des ressources sur le serveur
-	@param location_key : key de config de l'emplacement des ressources sur le serveur correspondant
-	le mieux au path de la requete
+	@brief Compare l'URI avec les locations du fichier de config et essaie de trouver la meilleure correspondance.
+		   Si une correspondance est trouvée, location_key est défini sur cet emplacement.
+		   Sinon, elle est vide.
+
+	@example path = /html/index.html
+
+	locations = {
+    {
+        path = "/",
+        ...
+    },
+    {
+        path = "/html",
+        ...
+    },
+    {
+        path = "/cgi-bin",
+        ...
+    }
+}
+
 */
 
 static void	getLocationMatch(std::string &path, std::vector<Location> locations, std::string &location_key)
@@ -376,25 +400,37 @@ static void	getLocationMatch(std::string &path, std::vector<Location> locations,
 	}
 }
 
+// Analyse la requête HTTP reçue et décide comment y répondre
+// Renvoie (0) si la requête est traitée avec succès
+// 1 si erreur (_code = code de statut approprié)
+
 int	Response::handleTarget()
 {
 	std::string	location_key;
 	getLocationMatch(request.getPath(), _server.getLocations(), location_key);
-	
+
 	if (location_key.length() > 0)
 	{
-		Location target_location = *_server.getLocationKey(location_key);
+		// target_location contient l'objet Location correspondant à la key location_key
+		// Rappel : Location contient les infos de config de la requête HTTP en cours
+		// (path de l'emplacement, méthode autorisée, extensions CGI autorisées ...)
+
+		Location	target_location = *_server.getLocationKey(location_key);
+
+		
 
 		if (isAllowedMethod(request.getMethod(), target_location, _code))
 		{
 			std::cout << "METHOD NOT ALLOWED \n";
 			return (1);
 		}
+
 		if (request.getBody().length() > target_location.getMaxBodySize())
 		{
 			_code = 413;
 			return (1);
 		}
+
 		if (checkReturn(target_location, _code, _location))
 			return (1);
 
@@ -412,13 +448,10 @@ int	Response::handleTarget()
 
 		if (!target_location.getCgiExtension().empty())
 		{
-
 			if (_target_file.rfind(target_location.getCgiExtension()[0]) != std::string::npos)
-			{
 				return (handleCgiTemp(location_key));
-			}
-
 		}
+
 		if (isDirectory(_target_file))
 		{
 			if (_target_file[_target_file.length() - 1] != '/')
@@ -452,6 +485,7 @@ int	Response::handleTarget()
 			if (isDirectory(_target_file))
 			{
 				_code = 301;
+
 				if (!target_location.getIndexLocation().empty())
 					_location = combinePaths(request.getPath(), target_location.getIndexLocation(), "");
 				else
@@ -463,11 +497,10 @@ int	Response::handleTarget()
 			}
 		}
 	}
-
+	
 	else
 	{
 		_target_file = combinePaths(_server.getRoot(), request.getPath(), "");
-
 		if (isDirectory(_target_file))
 		{
 			if (_target_file[_target_file.length() - 1] != '/')
@@ -477,13 +510,11 @@ int	Response::handleTarget()
 				return (1);
 			}
 			_target_file += _server.getIndex();
-
 			if (!fileExists(_target_file))
 			{
 				_code = 403;
 				return (1);
 			}
-
 			if (isDirectory(_target_file))
 			{
 				_code = 301;
@@ -497,9 +528,9 @@ int	Response::handleTarget()
 	return (0);
 }
 
-bool Response::reqError()
+bool	Response::reqError()
 {
-	if(request.errorCode())
+	if (request.errorCode())
 	{
 		_code = request.errorCode();
 		return (1);
@@ -507,63 +538,103 @@ bool Response::reqError()
 	return (0);
 }
 
-void Response::setServerDefaultErrorPages()
+void	Response::setServerDefaultErrorPages()
 {
 	_response_body = getErrorPage(_code);
 }
 
-void Response::buildErrorBody()
+/**
+	@brief Est call lorsqu'une erreur est détectée dans la requête (404 par exemple)
+
+	@example	HTTP/1.1 404 Not Found
+			 	Content-Type: text/html
+
+				<!DOCTYPE html>
+				<html>
+				<head>
+					<title>404 Not Found</title>
+				</head>
+				<body>
+					<h1>404 Not Found</h1>
+				<p>The requested URL was not found on this server.</p>
+				</body>
+				</html>
+ */
+
+void	Response::buildErrorBody()
 {
-		if( !_server.getErrorPages().count(_code) || _server.getErrorPages().at(_code).empty() ||
+		// rappel : DELETE et POST sont idempotente donc ne renvoient pas de page d'erreur
+		if (!_server.getErrorPages().count(_code) || _server.getErrorPages().at(_code).empty() ||
 		 request.getMethod() == DELETE || request.getMethod() == POST)
 		{
 			setServerDefaultErrorPages();
 		}
-		else
+
+		// une page d'erreur personnalisée est définie
+		else 
 		{
-			if(_code >= 400 && _code < 500)
+			// Redirige le client vers une page d'erreur personnalisée
+			if (_code >= 400 && _code < 500)
 			{
+				// _location = URL de la page d'erreur correspondant au code d'erreur
 				_location = _server.getErrorPages().at(_code);
-				if(_location[0] != '/')
+
+				if (_location[0] != '/')
 					_location.insert(_location.begin(), '/');
+
 				_code = 302;
 			}
 
 			_target_file = _server.getRoot() +_server.getErrorPages().at(_code);
-			short old_code = _code;
-			if(readFile())
+			short	old_code = _code;
+			
+			// charge le contenu du fichier d'erreur personnalisé
+			// dans la variable _response_body
+			if (readFile())
 			{
 				_code = old_code;
 				_response_body = getErrorPage(_code);
 			}
 		}
-
 }
-void    Response::buildResponse()
+
+// Construit la réponse HTTP à renvoyée au client
+
+void	Response::buildResponse()
 {
 	if (reqError() || buildBody())
 		buildErrorBody();
+
+	// car réponse générée par script cgi
 	if (_cgi)
-		return ;
+		return;
+
 	else if (_auto_index)
 	{
 		std::cout << "AUTO index " << std::endl;
+
+		
+		// si echec du build html
 		if (buildHtmlIndex(_target_file, _body, _body_length))
 		{
 			_code = 500;
 			buildErrorBody();
 		}
+
 		else
 			_code = 200;
 		_response_body.insert(_response_body.begin(), _body.begin(), _body.end());
 	}
+
 	setStatusLine();
 	setHeaders();
+
+	// HEAD = pas de body dans la réponse (que les headers)
 	if (request.getMethod() != HEAD && (request.getMethod() == GET || _code != 200))
 		_response_content.append(_response_body);
 }
 
-void Response::setErrorResponse(short code)
+void	Response::setErrorResponse(short code)
 {
 	_response_content = "";
 	_code = code;
@@ -574,52 +645,60 @@ void Response::setErrorResponse(short code)
 	_response_content.append(_response_body);
 }
 
-/* Returns the entire reponse ( Headers + Body )*/
-std::string Response::getRes()
+// Retourne la réponse complète (headers + body)
+std::string	Response::getRes()
 {
 	return (_response_content);
 }
 
-/* Returns the length of entire reponse ( Headers + Body) */
-size_t Response::getLen() const
+size_t	Response::getLen() const
 {
 	return (_response_content.length());
 }
 
-/* Constructs Status line based on status code. */
-void        Response::setStatusLine()
+// Construit la ligne de statut basé sur le code de statut
+// HTTP/1.1 404 Not Found\r\n
+void	Response::setStatusLine()
 {
 	_response_content.append("HTTP/1.1 " + toString(_code) + " ");
 	_response_content.append(statusCodeString(_code));
 	_response_content.append("\r\n");
 }
 
-int    Response::buildBody()
+// Construit le corps de la réponse en fonction de la méthode de la requête
+// et du code de réponse
+
+int	Response::buildBody()
 {
 	if (request.getBody().length() > _server.getClientMaxBodySize())
 	{
 		_code = 413;
 		return (1);
 	}
-	if ( handleTarget() )
+
+	if (handleTarget())
 		return (1);
 	if (_cgi || _auto_index)
 		return (0);
 	if (_code)
 		return (0);
+
 	if (request.getMethod() == GET || request.getMethod() == HEAD)
 	{
 		if (readFile())
 			return (1);
 	}
-	 else if (request.getMethod() == POST || request.getMethod() == PUT)
+	
+	else if (request.getMethod() == POST || request.getMethod() == PUT)
 	{
 		if (fileExists(_target_file) && request.getMethod() == POST)
 		{
 			_code = 204;
 			return (0);
 		}
+
 		std::ofstream file(_target_file.c_str(), std::ios::binary);
+
 		if (file.fail())
 		{
 			_code = 404;
@@ -637,6 +716,7 @@ int    Response::buildBody()
 			file.write(request.getBody().c_str(), request.getBody().length());
 		}
 	}
+	
 	else if (request.getMethod() == DELETE)
 	{
 		if (!fileExists(_target_file))
@@ -644,7 +724,7 @@ int    Response::buildBody()
 			_code = 404;
 			return (1);
 		}
-		if (remove( _target_file.c_str() ) != 0 )
+		if (remove(_target_file.c_str() ) != 0)
 		{
 			_code = 500;
 			return (1);
@@ -654,7 +734,10 @@ int    Response::buildBody()
 	return (0);
 }
 
-int Response::readFile()
+// Ouvre le fichier correspondant à la requête dans _target_file, et lit son contenu
+// Le stocke dans _response_body
+
+int	Response::readFile()
 {
 	std::ifstream file(_target_file.c_str());
 
@@ -663,23 +746,26 @@ int Response::readFile()
 		_code = 404;
 		return (1);
 	}
-	std::ostringstream ss;
+
+	std::ostringstream	ss;
+	
 	ss << file.rdbuf();
 	_response_body = ss.str();
+
 	return (0);
 }
 
-void     Response::setServer(ServerConfig &server)
+void	Response::setServer(ServerConfig &server)
 {
 	_server = server;
 }
 
-void    Response::setRequest(HttpRequest &req)
+void	Response::setRequest(HttpRequest &req)
 {
 	request = req;
 }
 
-void        Response::cutRes(size_t i)
+void	Response::cutRes(size_t i)
 {
 	_response_content = _response_content.substr(i);
 }
@@ -698,21 +784,63 @@ void   Response::clear()
 	_auto_index = 0;
 }
 
-int      Response::getCode() const
+int	Response::getCode() const
 {
 	return (_code);
 }
 
-int    Response::getCgiState()
+int	Response::getCgiState()
 {
 	return (_cgi);
 }
 
-std::string Response::removeBoundary(std::string &body, std::string &boundary)
+/**
+	@example 
+
+	------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="username"
+
+John Doe
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="test.txt"
+Content-Type: text/plain
+
+Contenu du fichier test.txt
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+--> 
+
+std::string body = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\n"
+                   "Content-Disposition: form-data; name=\"username\"\r\n"
+                   "\r\n"
+                   "John Doe\r\n"
+                   "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\n"
+                   "Content-Disposition: form-data; name=\"file\"; filename=\"test.txt\"\r\n"
+                   "Content-Type: text/plain\r\n"
+                   "\r\n"
+                   "Contenu du fichier test.txt\r\n"
+                   "------WebKitFormBoundary7MA4YWxkTrZu0gW--\r\n";
+
+std::string boundary = "7MA4YWxkTrZu0gW";
+
+std::string new_body = removeBoundary(body, boundary);
+
+// new_body contient maintenant la chaîne suivante :
+// "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\n"
+// "Content-Disposition: form-data; name=\"username\"\r\n"
+// "\r\n"
+// "John Doe\r\n"
+// "------WebKitFormBoundary7MA4YWxkTrZu0gW--\r\n"
+
+*/
+
+std::string	Response::removeBoundary(std::string &body, std::string &boundary)
 {
-	std::string buffer;
-	std::string new_body;
-	std::string filename;
+	std::string	buffer;
+	std::string	new_body;
+	std::string	filename;
+	
 	bool is_boundary = false;
 	bool is_content = false;
 
@@ -754,7 +882,6 @@ std::string Response::removeBoundary(std::string &body, std::string &boundary)
 				}
 
 			}
-			
 			else if (is_content)
 			{
 				if (!buffer.compare(("--" + boundary + "\r")))
@@ -777,7 +904,7 @@ std::string Response::removeBoundary(std::string &body, std::string &boundary)
 	return (new_body);
 }
 
-void      Response::setCgiState(int state)
+void	Response::setCgiState(int state)
 {
 	_cgi = state;
 }
