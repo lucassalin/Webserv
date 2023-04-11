@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 10:49:55 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/10 15:57:38 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/11 11:13:58 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -278,8 +278,6 @@ int	Response::handleCgiTemp(std::string &location_key)
 	return (0);
 }
 
-// 
-
 int	Response::handleCgi(std::string &location_key)
 {
 	std::string path;
@@ -342,5 +340,42 @@ int	Response::handleCgi(std::string &location_key)
 	_cgi_obj.execute(this->_code);
 
 	return (0);
+}
+
+/*
+	Compares URI with locations from config file and tries to find the best match.
+	If match found, then location_key is set to that location, otherwise location_key will be an empty string.
+*/
+
+/**
+	@brief Parcourt le vecteur 'locations' et compare le path de chaque objet Location avec le path
+	de la requete
+
+	@param path : path de la requete
+	@param locations : vecteur d'objets Location, contient la configuration des emplacements
+	des ressources sur le serveur
+	@param location_key : key de config de l'emplacement des ressources sur le serveur correspondant
+	le mieux au path de la requete
+*/
+
+static void	getLocationMatch(std::string &path, std::vector<Location> locations, std::string &location_key)
+{
+	size_t	biggest_match = 0;
+
+	for(std::vector<Location>::const_iterator it = locations.begin(); it != locations.end(); ++it)
+	{
+		if (path.find(it->getPath()) == 0)
+		{
+			if (it->getPath() == "/" || path.length() == it->getPath().length()
+				|| path[it->getPath().length()] == '/')
+			{
+				if (it->getPath().length() > biggest_match)
+				{
+					biggest_match = it->getPath().length();
+					location_key = it->getPath();
+				}
+			}
+		}
+	}
 }
 
