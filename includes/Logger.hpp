@@ -6,14 +6,14 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/10 14:10:55 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/12 14:16:23 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/12 15:25:01 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
 
-# include "Webserv.hpp"
+#include "Webserv.hpp"
 
 #define RESET          "\x1B[0m"
 #define RED            "\x1B[31m"
@@ -27,44 +27,44 @@
 #define LIGHTMAGENTA   "\x1B[95m"
 #define GST             4;
 
-
 /* Not used currently */
-enum LogPrio{
-    DEBUG,
-    INFO,
-    ERROR
+enum LogPrio
+{
+	DEBUG,
+	INFO,
+	ERROR
 };
 
-enum L_State{
-    ON,
-    OFF
+enum L_State
+{
+	ON,
+	OFF
 };
 
-
-enum Mode{
-    CONSOLE_OUTPUT,
-    FILE_OUTPUT
+enum Mode
+{
+	CONSOLE_OUTPUT,
+	FILE_OUTPUT
 };
 
-class Logger{
+class Logger
+{
+	public:
+		static std::string						file_name;
+		static LogPrio							prio;
+		static std::map<LogPrio, std::string>	prio_str;
+		static L_State							state;
 
-    public:
-        static std::string file_name;
-        static LogPrio prio;
-        static std::map<LogPrio, std::string> prio_str;
-        static L_State state;
+		static void			setFilenName(std::string);
+		static void			setState(L_State);
 
-        static void         setFilenName(std::string);
-        static void         setState(L_State);
+		static void			logMsg(const char *, Mode, const char*, ...);
+		static void			setPrio(LogPrio);
+		static void			enableFileLog();
+		static std::string	getCurrTime();
 
-        static void         logMsg(const char *, Mode, const char*, ...);
-        static void         setPrio(LogPrio);
-        static void         enableFileLog();
-        static std::string  getCurrTime();
-    private:
-        static std::map<LogPrio, std::string> initMap();
-
+	private:
+		static std::map<LogPrio, std::string>	initMap();
 };
-
 
 #endif
