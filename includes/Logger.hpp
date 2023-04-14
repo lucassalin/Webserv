@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/10 14:10:55 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/12 15:25:01 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/14 09:53:03 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,19 +15,19 @@
 
 #include "Webserv.hpp"
 
-#define RESET          "\x1B[0m"
-#define RED            "\x1B[31m"
-#define LIGHT_RED      "\x1B[91m"
-#define WHITE          "\x1B[37m"
-#define BLINK           "\x1b[5m"
-#define YELLOW         "\x1B[33m"
-#define LIGHT_BLUE     "\x1B[94m"
-#define CYAN           "\x1B[36m"
-#define DARK_GREY      "\x1B[90m"
-#define LIGHTMAGENTA   "\x1B[95m"
-#define GST             4;
+#define RESET			"\x1B[0m"
+#define RED				"\x1B[31m"
+#define LIGHT_RED		"\x1B[91m"
+#define WHITE			"\x1B[37m"
+#define BLINK			"\x1b[5m"
+#define YELLOW			"\x1B[33m"
+#define LIGHT_BLUE		"\x1B[94m"
+#define CYAN			"\x1B[36m"
+#define DARK_GREY		"\x1B[90m"
+#define LIGHTMAGENTA	"\x1B[95m"
+#define GST				4;
 
-/* Not used currently */
+// Pas utilise
 enum LogPrio
 {
 	DEBUG,
@@ -47,13 +47,15 @@ enum Mode
 	FILE_OUTPUT
 };
 
+// Classe de journalisation
+
 class Logger
 {
 	public:
-		static std::string						file_name;
-		static LogPrio							prio;
-		static std::map<LogPrio, std::string>	prio_str;
-		static L_State							state;
+		static std::string						file_name;	// fichier de sortie pour les journaux
+		static LogPrio							prio;		// priorite du journal
+		static std::map<LogPrio, std::string>	prio_str;	// map priorite journal-string correspondante
+		static L_State							state;		// etat du journal
 
 		static void			setFilenName(std::string);
 		static void			setState(L_State);
@@ -61,6 +63,7 @@ class Logger
 		static void			logMsg(const char *, Mode, const char*, ...);
 		static void			setPrio(LogPrio);
 		static void			enableFileLog();
+
 		static std::string	getCurrTime();
 
 	private:
