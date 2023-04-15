@@ -1,8 +1,8 @@
 #! /usr/bin/python3
 
-#Script pour la connexion et l'enregistrement des users
+""" Script pour la connexion et l'enregistrement des users """
 
-#module http = gros paquet contenant plusieurs modules
+# module http = gros paquet contenant plusieurs modules
 from http import cookies
 import os
 import cgi
@@ -11,7 +11,7 @@ import hashlib	#module algos de hachage
 import pickle	#module serialisation/deserialisation objets Python en fichiers binaires
 import sys		#module pour interagir avec le systeme et les args du script en cours
 
-#Represente une session d'user
+# Represente une session d'user
 class Session:
 	def __init__(self, name):
 		self.name = name
@@ -21,7 +21,7 @@ class Session:
 	def getSid(self):
 		return self.sid
 
-""" Stores Users and thier data  """
+# Stocke les utilisateurs ainsi que leurs donnees dans une base de donnees
 class UserDataBase:
 	def __init__(self):
 		self.user_pass = {}
@@ -32,7 +32,7 @@ class UserDataBase:
 		with open('cgi-bin/user_database', 'wb') as f:
 			pickle.dump(self, f)
 
-
+# Affiche la page d'accueil pour l'utilisateur une fois authentifié
 def printAccPage(session):
 	print("Content-type: text/html\r\n")
 	print("<html>")
@@ -81,9 +81,7 @@ def printLogin():
 	print("</body>   ")
 	print("</html>")
 
-
-
-
+# Verifie l'authentification de l'utilisateur
 def authUser(name, password):
 	if os.path.exists('cgi-bin/user_database'):
 		with open('cgi-bin/user_database', 'rb') as f:
@@ -95,6 +93,9 @@ def authUser(name, password):
 				return None
 	else:
 		return None
+
+# Gère la connexion et l’inscription de l’user
+# Sera call lorsque l’env ne contient pas de cookie “SID” signifiant que l’user n'est pas encore co
 
 def handleLogin():
 	username = form.getvalue('username')
@@ -110,7 +111,7 @@ def handleLogin():
 			print("Correct Crenditales :D",file=sys.stderr)
 			cookies.clear()
 			cookies["SID"] = session.getSid()
-			cookies["SID"]["expires"] = 120 # Session Expires after 2 mins
+			cookies["SID"]["expires"] = 120 # La session expire apres 120s
 			print("HTTP/1.1 301 OK")
 			print(cookies.output())
 			print("location: acc.py")
@@ -146,9 +147,3 @@ if 'HTTP_COOKIE' in os.environ:
 		handleLogin()    
 else:
 	handleLogin()
-			
-
-		
-
-
-

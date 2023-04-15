@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 
+# Creer une page web affichant un message de bienvenue
+# en utilisant les infos fournies par l'user
+
 import cgi
 import sys
 import os

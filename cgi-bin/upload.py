@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+# Gere l'upload de fichiers sur un serveur
+
 import cgi, os
 
 form = cgi.FieldStorage()

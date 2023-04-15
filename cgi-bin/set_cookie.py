@@ -1,5 +1,7 @@
 #! /usr/bin/python3
 
+# Creer un cookie
+
 import os
 from http import cookies
 # Import modules for CGI handling 

@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+#Importe les variables env dans le body de la reponse HTTP
+
 import os
 import cgi
 
@@ -14,7 +16,7 @@ print("<h2>Environment:</h2><br>")
 print("<html>")
 print("<body>")
 for param in os.environ.keys():
-    print("<b>%20s</b>: %s<br>" % (param, os.environ[param]))
+	print("<b>%20s</b>: %s<br>" % (param, os.environ[param]))
 
 print("</body>")
 print("</html>")

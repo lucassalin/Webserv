@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+# Affiche l'heure actuelle sur notre page web
+
 import datetime
 import cgi
 
