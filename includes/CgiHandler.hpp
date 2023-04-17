@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 11:00:47 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/12 14:16:13 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/17 15:31:51 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ class CgiHandler
 		pid_t								_cgi_pid;
 
 	public:
-		
+
 		// Le script CGI utilise pipe_in[0] pour lire les donnees envoyees par le serveur
 		// Ecrit les resultats dans pipe_out[1]
 		// Le serveur lire les donnees dans pipe_out[0] et ecrit le resultat dans

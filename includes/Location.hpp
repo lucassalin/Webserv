@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:24:47 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/17 14:44:51 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/17 15:19:00 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,24 +15,24 @@
 
 #include "Webserv.hpp"
 
-// Définit une configuration pour chaque ressource pouvant être demandée par un client
+// Gere les configs specifiques d'un emplacement dans notre serveur
 
 class Location
 {
 	private:
-		std::string					_path;		// chemin relatif
-		std::string					_root;		// chemin absolu
-		bool						_autoindex;	// auto-indexation activé ou non ?
-		std::string					_index;		// nom du fichier à utiliser comme page d'accueil pour la location en question
-		std::vector<short>			_methods;	// GET + POST + DELETE + PUT + HEAD
-		std::string					_return;	// remplacement où renvoyer la requête pour cette location
+		std::string					_path; // chemin relatif de l'emplacement
+		std::string					_root; // chemin absolu de l'emplacement
+		bool						_autoindex;
+		std::string					_index; // nom du fichier à utiliser comme page d'accueil pour cet emplacement
+		std::vector<short>			_methods;
+		std::string					_return; // redirection a appliquer pour cet emplacement
 		std::string					_alias;
-		std::vector<std::string>	_cgi_path;
-		std::vector<std::string>	_cgi_ext;	// extensions de fichiers pour les scripts CGI de cette location
-		unsigned long				_client_max_body_size;
+		std::vector<std::string>	_cgi_path; // vecteur contenant les chemins des scripts CGI pour cet emplacement
+		std::vector<std::string>	_cgi_ext; // vecteur contenant les extensions de fichiers pour les scripts CGI de cet emplacement
+		unsigned long				_client_max_body_size; // Taille max des body des requetes acceptees pour cet emplacement
 
 	public:
-		std::map<std::string, std::string>	_ext_path; // key = extension de fichier ; value = path de ce fichier
+		std::map<std::string, std::string>	_ext_path;		// key = extension du fichier ; value = path du fichier
 
 		Location();
 		Location(const Location &other);

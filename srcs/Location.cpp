@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:28:18 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/17 14:49:19 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/17 15:18:05 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,20 +70,12 @@ void	Location::setPath(std::string parametr)
 	this->_path = parametr;
 }
 
-/**
- @brief Définit le répertoire racine pour une instance de Location
-
- @param parametr : path du répertoire racine
- */
-
 void	Location::setRootLocation(std::string parametr)
 {
 	if (ConfigFile::getTypePath(parametr) != 2)
 		throw ServerConfig::ErrorException("root of location");
 	this->_root = parametr;
 }
-
-// Définit les méthodes HTTP autorisées pour une instance de Localisation
 
 void	Location::setMethods(std::vector<std::string> methods)
 {
@@ -93,7 +85,6 @@ void	Location::setMethods(std::vector<std::string> methods)
 	this->_methods[3] = 0;
 	this->_methods[4] = 0;
 
-	// Définit a 1 la méthode passée en paramètre
 	for (size_t i = 0; i < methods.size(); i++)
 	{
 		if (methods[i] == "GET")
@@ -111,14 +102,8 @@ void	Location::setMethods(std::vector<std::string> methods)
 	}
 }
 
-// Définit la valeur de _autoindex
-// En fonction que l'auto-indexation est validée ou non
-// 
-
 void	Location::setAutoindex(std::string parametr)
 {
-	// si on --> _autoindex = true
-	// si off --> _autoindex = false
 	if (parametr == "on" || parametr == "off")
 		this->_autoindex = (parametr == "on");
 	else
@@ -150,24 +135,19 @@ void	Location::setCgiExtension(std::vector<std::string> extension)
 	this->_cgi_ext = extension;
 }
 
-// Définit la taille maximale du body d'une requête acceptée pour cette location
-// Si paramtr = 100, la taille max du body est de 100 octets
-
 void	Location::setMaxBodySize(std::string parametr)
 {
 	unsigned long body_size = 0;
 
-	// Check que paramtr contient bien des chiffres
 	for (size_t i = 0; i < parametr.length(); i++)
 	{
 		if (parametr[i] < '0' || parametr[i] > '9')
 			throw ServerConfig::ErrorException("Wrong syntax: client_max_body_size");
 	}
 
-	// Convertit la string en un unsigned int
 	if (!ft_stoi(parametr))
 		throw ServerConfig::ErrorException("Wrong syntax: client_max_body_size");
-		
+
 	body_size = ft_stoi(parametr);
 	this->_client_max_body_size = body_size;
 }
@@ -232,12 +212,12 @@ const	unsigned long &Location::getMaxBodySize() const
 	return (this->_client_max_body_size);
 }
 
-// Retourne une string représentant les méthodes HTTP autorisées pour la location
+// Retourne une string représentant les méthodes HTTP autorisées pour l'emplacement
 
 std::string Location::getPrintMethods() const
 {
 	std::string	res;
-	
+
 	if (_methods[4])
 		res.insert(0, "HEAD");
 
