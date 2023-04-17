@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 11:00:47 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/17 15:31:51 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/17 21:09:24 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,10 +31,10 @@ class CgiHandler
 
 	public:
 
-		// Le script CGI utilise pipe_in[0] pour lire les donnees envoyees par le serveur
-		// Ecrit les resultats dans pipe_out[1]
-		// Le serveur lire les donnees dans pipe_out[0] et ecrit le resultat dans
-		// pipe_in[1]
+		// Le script CGI lit les données envoyées par le serveur dans pipe_in[0]
+		// Et écrit ses résultats dans pipe_out[1]
+		// Le serveur lit les données du script dans pipe_out[0]
+		// Et écrit dans pipe_in[1]
 
 		int	pipe_in[2];
 		int	pipe_out[2];
