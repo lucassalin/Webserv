@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 16:49:48 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/11 11:36:29 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/17 14:06:50 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,15 +48,10 @@ HttpRequest::HttpRequest()
 HttpRequest::~HttpRequest() {}
 
 /**
- @brief Check si faille "path Traversal" 
- 		Caractères autorisés selon la RFC:
- 
- 		- Alphanumeriques	: A-Z a-z 0-9
- 		- Non réservés		: - _ . ~
- 		- Réservés			: * ' ( ) ; : @ & = + $ , / ? % # [ ]
+	@brief Verifie la position de l'URI dans la requete (faille "path Traversal")
 
- @return true si oui (le path contient des ":"), sinon false
- */
+	@return true si le path contient des ":", sinon false
+*/
 
 bool	checkUriPos(std::string path)
 {
@@ -132,9 +127,9 @@ void	toLower(std::string &str)
 		str[i] = std::tolower(str[i]);
 }
 
-// Parse les datas HTTP recues par le serveur
-// Est call a chaque fois qu'un nouveau morceau de datas est recu
-// Et est responsable de m.a.j l'etat du parseur des headers
+// Parse le contenu d'une requete HTTP
+// Change d'etat en fonction de l'avance du parsing
+// Si erreur, actualise _error_code
 
 void	HttpRequest::feed(char *data, size_t size)
 {
@@ -145,7 +140,6 @@ void	HttpRequest::feed(char *data, size_t size)
 	{
 		character = data[i];
 
-		// Execute un certain bloc de code en fonction du code d'etat
 		switch (_state)
 		{
 
@@ -156,7 +150,6 @@ void	HttpRequest::feed(char *data, size_t size)
 			if (character == 'G')
 				_method = GET;
 			
-			// "P" = PUT ou POST
 			else if (character == 'P')
 			{
 				_state = Request_Line_Post_Put;
@@ -169,7 +162,6 @@ void	HttpRequest::feed(char *data, size_t size)
 			else if (character == 'H')
 				_method = HEAD;
 
-			// Sinon erreur 501 ("Not implemented")
 			else
 			{
 				_error_code = 501;
@@ -177,14 +169,11 @@ void	HttpRequest::feed(char *data, size_t size)
 				return;
 			}
 			
-			// Si la methode est correctement reconnue
-			// On passe au traitement de la 2e partie
-			
 			_state = Request_Line_Method;
 			break;
 		}
 
-		// POST ou PUT
+		// POST/PUT
 
 		case Request_Line_Post_Put:
 		{
@@ -219,8 +208,7 @@ void	HttpRequest::feed(char *data, size_t size)
 				return;
 			}
 
-			// Check si le nombre de caracteres de la methode correspond
-			// a ce qui est attendu
+			// Check si le nombre de caracteres de la methode correspond a ce qui est attendu
 			// Espace apres le nom de methode donc on passe a cet etat
 
 			if ((size_t)_method_index == _method_str[_method].length())
@@ -241,7 +229,7 @@ void	HttpRequest::feed(char *data, size_t size)
 			continue;
 		}
 
-		// GET /hello.txt HTTP/1.1
+		// GET /hello.txt HTTP/1.1 --> /hello.txt
 
 		case Request_Line_URI_Path_Slash:
 		{
@@ -250,12 +238,14 @@ void	HttpRequest::feed(char *data, size_t size)
 				_state = Request_Line_URI_Path;
 				_storage.clear();
 			}
+
 			else
 			{
 				_error_code = 400;
 				std::cout << "Bad Character (Request_Line_URI_Path_Slash)" << std::endl;
 				return;
 			}
+
 			break;
 		}
 
@@ -271,7 +261,7 @@ void	HttpRequest::feed(char *data, size_t size)
 				continue;
 			}
 
-			// Query permettent d'add des parametres supplementaires (optionnel)
+			// Query permet d'ajouter des parametres supplementaires (optionnel)
 			// L'element est separe par sa valeur avec un "="
 
 			else if (character == '?')
@@ -282,8 +272,7 @@ void	HttpRequest::feed(char *data, size_t size)
 				continue;
 			}
 
-			// Fragment permettent de pointer vers 
-			// une partie specifique de la ressource
+			// Fragment permettent de pointer vers une partie specifique de la ressource
 
 			else if (character == '#')
 			{
@@ -540,10 +529,9 @@ void	HttpRequest::feed(char *data, size_t size)
 			break;
 		}
 
+		// Fin des headers
 		case Fields_End:
 		{
-			// Fin des headers
-
 			if (character == '\n')
 			{
 				_storage.clear();
@@ -655,7 +643,7 @@ void	HttpRequest::feed(char *data, size_t size)
 				std::cout << "Bad Character (Chunked_Length_Begin)" << std::endl;
 				return;
 			}
-			
+
 			s.str(""); // on vide le contenu du flux de s pour s'assurer qu'il ne contient pas de précédentes valeurs
 			s.clear(); // clear() pour reinit les indicateurs d'erreurs
 			s << character; // on add le caractère lu depuis la requête à notre string
@@ -1039,8 +1027,6 @@ void HttpRequest::clear()
 	_chunked_flag = false;
 	_multiform_flag = false;
 }
-
-// --------------------------------------------------------------------------------------------------//
 
 /**
  @brief Vérifie si le header "Connection" est present dans la requete, et si sa valeur est "close"

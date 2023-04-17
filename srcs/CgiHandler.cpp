@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 11:01:04 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/11 11:47:42 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/17 13:14:20 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,7 +156,7 @@ void	CgiHandler::initEnvCgi(HttpRequest& req, const std::vector<Location>::itera
 	this->_env["REQUEST_METHOD"] = req.getMethodStr();
 	this->_env["SERVER_PROTOCOL"] = "HTTP/1.1";
 	this->_env["REDIRECT_STATUS"] = "200";
-	this->_env["SERVER_SOFTWARE"] = "AMANIX";
+	this->_env["SERVER_SOFTWARE"] = "42Paris";
 
 	std::map<std::string, std::string> request_headers = req.getHeaders();
 
@@ -237,7 +237,7 @@ void	CgiHandler::initEnv(HttpRequest& req, const std::vector<Location>::iterator
 	this->_env["REQUEST_URI"] = req.getPath() + req.getQuery();
 	this->_env["SERVER_PROTOCOL"] = "HTTP/1.1";
 	this->_env["REDIRECT_STATUS"] = "200";
-	this->_env["SERVER_SOFTWARE"] = "AMANIX";
+	this->_env["SERVER_SOFTWARE"] = "42Paris";
 
 	this->_ch_env = (char **)calloc(sizeof(char *), this->_env.size() + 1);
 	std::map<std::string, std::string>::const_iterator it = this->_env.begin();

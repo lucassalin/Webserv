@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:24:47 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/12 14:16:21 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/17 14:44:51 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ class Location
 		const std::map<std::string, std::string>	&getExtensionPath() const;
 		const unsigned long							&getMaxBodySize() const;
 
-		std::string	getPrintMethods() const; // for checking only
+		std::string	getPrintMethods() const;
 };
 
 #endif

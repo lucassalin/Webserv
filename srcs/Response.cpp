@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 10:49:55 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/12 14:16:37 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/17 13:52:23 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,6 @@ Response::Response(HttpRequest &req) : request(req)
 }
 
 /*
-
 HTTP/1.1 200 OK
 Date: Mon, 04 Apr 2023 12:34:56 UTC
 Server: Apache/2.4.46
@@ -102,7 +101,7 @@ void	Response::connection()
 
 void	Response::server()
 {
-	_response_content.append("Server: AMAnix\r\n");
+	_response_content.append("Server: 42Paris\r\n");
 }
 
 void	Response::location()

@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:28:18 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/10 10:18:48 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/17 14:49:19 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,10 @@ Location::Location()
 	this->_return = "";
 	this->_alias = "";
 	this->_client_max_body_size = MAX_CONTENT_LENGTH;
-	this->_methods.reserve(5);		// allocation pour les 5 méthodes
+	this->_methods.reserve(5);		// 5 méthodes
 	this->_methods.push_back(1);	// GET activée par défaut
 	this->_methods.push_back(0);	// Les 4 autres sont désactivées par défaut
-	this->_methods.push_back(0);	// car modification d'état du serveur
+	this->_methods.push_back(0); 
 	this->_methods.push_back(0);
 	this->_methods.push_back(0);
 }

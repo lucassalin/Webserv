@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 16:50:27 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/12 14:16:20 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/17 13:16:16 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,12 +64,9 @@ enum ParsingState
 	Parsing_Done
 };
 
-/**
- *
- * - HttpRequest Class will be used to parase and store the request.
-   It gets feeded with the request and will triiger a flag when parasing is finished.
-   - If any error was found in the request, _code will be set to the correct error code.
-**/
+// Parse et stocke le contenu de la requête
+// Déclenche un flag quand le parsing est terminé
+// Si une erreur est trouvée, _code est actualisé
 
 class HttpRequest
 {
