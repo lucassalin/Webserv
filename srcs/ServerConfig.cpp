@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:23:14 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/18 14:11:18 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/18 16:03:39 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -490,13 +490,15 @@ bool	ServerConfig::isValidErrorPages()
 }
 
 /**
-	@brief 
+	@brief Check si l'objet Location donné est valide et cohérent
 
-	@return int 
+	@return 0 si l'emplacement est valide
+	@return 1 si la validation CGI a échoué
+	@return 2 si le path de l'emplacement n'est pas valide
+	@return 3 si le fichier de redirection dans l'emplacement n'est pas valide
+	@return 4 si le fichier d'alias dans l'emplacement n'est pas valide
+	@return 5 si le fichier index dans l'emplacement n'est pas valide
 */
-
-// Check si l'objet Location donné est valide et cohérent
-// Retourne (0) si oui, sinon (1)
 
 int	ServerConfig::isValidLocation(Location &location) const
 {
@@ -651,9 +653,7 @@ int	ServerConfig::getFd()
 	return (this->_listen_fd); 
 }
 
-// Recupere le path vers une page d'erreur
-// en fonction de sa key dans la map _error_pages
-
+// Recupere le path vers une page d'erreur en fonction de sa key
 const std::string	&ServerConfig::getPathErrorPage(short key)
 {
 	std::map<short, std::string>::iterator it = this->_error_pages.find(key);
@@ -664,8 +664,7 @@ const std::string	&ServerConfig::getPathErrorPage(short key)
 	return (it->second);
 }
 
-// Trouve une location dans le vecteur _locations en fonction de sa key
-
+// Cherche un objet Location dont le path correspond à la string key
 const std::vector<Location>::iterator	ServerConfig::getLocationKey(std::string key)
 {
 	std::vector<Location>::iterator it;
@@ -693,9 +692,8 @@ void	ServerConfig::checkToken(std::string &parametr)
 	parametr.erase(pos);
 }
 
-// Verifie si deux locations de ressources sur le serveur n'ont pas la meme path
+// Verifie si deux emplacements de ressources sur le serveur n'ont pas la meme path
 // Retourne true si c'est le cas, sinon false
-
 bool	ServerConfig::checkLocaitons() const
 {
 	if (this->_locations.size() < 2)
@@ -717,7 +715,6 @@ bool	ServerConfig::checkLocaitons() const
 }
 
 // Configure et initialise le socket d'ecoute du serveur
-
 void	ServerConfig::setupServer(void)
 {
 	if ((_listen_fd = socket(AF_INET, SOCK_STREAM, 0) ) == -1)
@@ -728,8 +725,7 @@ void	ServerConfig::setupServer(void)
 
 	int	option_value = 1;
 
-	// configuration du socket avec SO_REUSEADDR pour l'adresse locale du socket puisse etre reutilisee
-	// par un autre socket s'il ferme
+	// SO_REUSEADDR permet à l'adresse locale du socket d'être reutilisee par un autre socket s'il ferme
 	// Evite l'erreur "Address already in use" si on relance rapidement le serveur apres l'avoir stop
 
 	setsockopt(_listen_fd, SOL_SOCKET, SO_REUSEADDR, &option_value, sizeof(int));
