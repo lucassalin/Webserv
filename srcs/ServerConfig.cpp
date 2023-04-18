@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:23:14 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/18 12:16:02 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/18 14:11:18 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,11 +113,11 @@ void	ServerConfig::setRoot(std::string root)
 	if (ConfigFile::getTypePath(root) == 2)
 	{
 		this->_root = root;
-		return ;
+		return;
 	}
 
 	char	dir[1024];
-	getcwd(dir, 1024); // obtient le path du repertoire courant
+	getcwd(dir, 1024);
 
 	std::string	full_root = dir + root;
 
@@ -128,7 +128,6 @@ void	ServerConfig::setRoot(std::string root)
 }
 
 // Check si la string parametr contient un nᵒ de port valide
-
 void	ServerConfig::setPort(std::string parametr)
 {
 	unsigned int port;
@@ -147,11 +146,10 @@ void	ServerConfig::setPort(std::string parametr)
 	if (port < 1 || port > 65636)
 		throw ErrorException("Wrong syntax: port");
 
-	this->_port = (uint16_t) port; //  uint16_t = 0 à 65535
+	this->_port = (uint16_t) port;
 }
 
 // Definit la taille max du body d'une requête que le serveur peut accepter
-
 void	ServerConfig::setClientMaxBodySize(std::string parametr)
 {
 	unsigned long body_size;
@@ -164,7 +162,7 @@ void	ServerConfig::setClientMaxBodySize(std::string parametr)
 		if (parametr[i] < '0' || parametr[i] > '9')
 			throw ErrorException("Wrong syntax: client_max_body_size");
 	}
-	
+
 	if (!ft_stoi(parametr))
 		throw ErrorException("Wrong syntax: client_max_body_size");
 		
@@ -189,12 +187,7 @@ void	ServerConfig::setAutoindex(std::string autoindex)
 		this->_autoindex = true;
 }
 
-/**
-	@brief Configure les pages d'erreurs personnalisées du serveur web
-		   Check s'il existe un tel code d'erreur par defaut
-		   Si oui --> ecrase le path d'acces au fichier
-		   Sinon --> creer une nouvelle paire key-value pour le path vers le fichier
-*/
+// Definit les pages d'erreurs personnalisees associees aux codes d'erreurs
 
 void	ServerConfig::setErrorPages(std::vector<std::string> &parametr)
 {
@@ -214,7 +207,8 @@ void	ServerConfig::setErrorPages(std::vector<std::string> &parametr)
 				throw ErrorException("Error code is invalid");
 		}
 
-		if (parametr[i].size() != 3) // code d'erreur = 3 chiffres
+		// code d'erreur = 3 chiffres
+		if (parametr[i].size() != 3)
 			throw ErrorException("Error code is invalid");
 
 		short code_error = ft_stoi(parametr[i]);
@@ -250,10 +244,11 @@ void	ServerConfig::setErrorPages(std::vector<std::string> &parametr)
 }
 
 /**
-	@brief Definit et configure la location des differents types de ressources possibles 
+	@brief Definit et configure l'emplacement des differents types de ressources possibles
+		   (autorisations a certains fichiers, redirections, script CGI...)
 
-	@param path : path de la location qu'on veut definir
-	@param parametr : contient les parametres a definir pour cette location (key-value)
+	@param path		: path de l'emplacement qu'on veut definir
+	@param parametr : vecteur contenant les parametres et leurs valeurs pour cet emplacement
 */
 
 void	ServerConfig::setLocation(std::string path, std::vector<std::string> parametr)
@@ -262,9 +257,9 @@ void	ServerConfig::setLocation(std::string path, std::vector<std::string> parame
 	std::vector<std::string>	methods;
 	int							valid;
 
-	bool flag_methods = false;
-	bool flag_autoindex = false;
-	bool flag_max_size = false;
+	bool	flag_methods = false;
+	bool	flag_autoindex = false;
+	bool	flag_max_size = false;
 
 	new_location.setPath(path);
 
@@ -276,7 +271,7 @@ void	ServerConfig::setLocation(std::string path, std::vector<std::string> parame
 
 		if (parametr[i] == "root" && (i + 1) < parametr.size())
 		{
-			// check si "root" n'a pas déjà été assignée a la location
+			// check si "root" n'a pas déjà été assigné (evite dupplication)
 			if (!new_location.getRootLocation().empty())
 				throw ErrorException("Root of location is duplicated");
 
@@ -467,11 +462,8 @@ void	ServerConfig::setFd(int fd)
 	this->_listen_fd = fd;
 }
 
-/**
-	@brief Check si l'adresse IP contenue dans "host" est valide ou non
-
-	@return true si valide, sinon false
-*/
+// Check si l'adresse IP contenue dans "host" est valide ou non
+// Retourne true si valide, sinon false
 
 bool	ServerConfig::isValidHost(std::string host) const
 {
@@ -479,12 +471,7 @@ bool	ServerConfig::isValidHost(std::string host) const
   	return (inet_pton(AF_INET, host.c_str(), &(sockaddr.sin_addr)) ? true : false);
 }
 
-/**
-	@brief Check si les pages d'erreurs definies pour le serveur sont valides
-
-	@return true si oui, sinon false
-*/
-
+// Check si les pages d'erreurs definies pour le serveur sont valides
 bool	ServerConfig::isValidErrorPages()
 {
 	std::map<short, std::string>::const_iterator	it;
@@ -502,15 +489,24 @@ bool	ServerConfig::isValidErrorPages()
 	return (true);
 }
 
-// Check si les parametres d'une location sont valides
+/**
+	@brief 
+
+	@return int 
+*/
+
+// Check si l'objet Location donné est valide et cohérent
+// Retourne (0) si oui, sinon (1)
 
 int	ServerConfig::isValidLocation(Location &location) const
 {
 	if (location.getPath() == "/cgi-bin")
 	{
+		// Ne doivent pas etre vides
 		if (location.getCgiPath().empty() || location.getCgiExtension().empty() || location.getIndexLocation().empty())
 			return (1);
 
+		// Index doit etre accessible en lecture & ecriture
 		if (ConfigFile::checkFile(location.getIndexLocation(), 4) < 0)
 		{
 			std::string path = location.getRootLocation() + location.getPath() + "/" + location.getIndexLocation();
@@ -526,6 +522,7 @@ int	ServerConfig::isValidLocation(Location &location) const
 				return (1);
 		}
 
+		// nombre de paths CGI doit correspondre au nombre d'extensions CGI
 		if (location.getCgiPath().size() != location.getCgiExtension().size())
 			return (1);
 
@@ -539,6 +536,8 @@ int	ServerConfig::isValidLocation(Location &location) const
 
 		std::vector<std::string>::const_iterator it_path;
 
+		// extensions CGI doivent etre valides (.py ou .sh)
+		// et correspondre aux paths CGI appropriés ("python" pour les fichiers .py et "bash"...)
 		for (it = location.getCgiExtension().begin(); it != location.getCgiExtension().end(); ++it)
 		{
 			std::string tmp = *it;
@@ -563,36 +562,42 @@ int	ServerConfig::isValidLocation(Location &location) const
 				}
 			}
 		}
-		
+
 		if (location.getCgiPath().size() != location.getExtensionPath().size())
 			return (1);
 	}
-	
+
+	// si le path de l'emplacement n'est pas /cgi-bin
 	else
 	{
+		// le path de l'emplacement doit commencer par "/"
 		if (location.getPath()[0] != '/')
 			return (2);
-			
+
+		// racine de l'emplacement vide --> definie sur la racine par defaut du serveur
 		if (location.getRootLocation().empty()) {
 			location.setRootLocation(this->_root);
 		}
-		
+
+		// fichier index de l'emplacement doit etre accessible en lecture + bonnes permissions
 		if (ConfigFile::isFileExistAndReadable(location.getRootLocation() + location.getPath() + "/", location.getIndexLocation()))
 			return (5);
-			
+
+		// si parametre de redirection defini (return)
+		// il doit etre accessible en lecture + bonnes permissions
 		if (!location.getReturn().empty())
 		{
 			if (ConfigFile::isFileExistAndReadable(location.getRootLocation(), location.getReturn()))
 				return (3);
 		}
-		
+
+		// si alias 
 		if (!location.getAlias().empty())
 		{
 			if (ConfigFile::isFileExistAndReadable(location.getRootLocation(), location.getAlias()))
 			 	return (4);
 		}
 	}
-
 	return (0);
 }
 

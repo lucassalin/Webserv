@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 14:34:29 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/18 12:27:38 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/18 13:08:59 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ ConfigFile::~ConfigFile() {}
 
 	@return (1) si c'est un fichier, (2) si c'est un dossier et (3) si c'est ni l'un ni l'autre
 	@return (-1) si échec
- */
+*/
 
 int	ConfigFile::getTypePath(std::string const path)
 {
@@ -33,9 +33,7 @@ int	ConfigFile::getTypePath(std::string const path)
 
 	result = stat(path.c_str(), &buffer);
 
-	// Utilisation du "ET logique" (&) pour tester 
-	// si le bit en question est activé ou non
-
+	// Utilisation du "ET logique" (&) pour tester si le bit en question est activé ou non
 	if (result == 0)
 	{
 		if (buffer.st_mode & S_IFREG)
@@ -49,8 +47,7 @@ int	ConfigFile::getTypePath(std::string const path)
 		return (-1);
 }
 
-// Retourne (0) si le fichier existe et que l'user a les permissions nécessaires 
-// en fonction d'un certain mode
+// Retourne (0) si le fichier existe et que l'user a les permissions nécessaires
 // Sinon (-1)
 
 int	ConfigFile::checkFile(std::string const path, int mode)
@@ -69,11 +66,9 @@ int	ConfigFile::checkFile(std::string const path, int mode)
 
 int	ConfigFile::isFileExistAndReadable(std::string const path, std::string const index)
 {
-	// Si index est un fichier et a les permissions de lecture (mode 4)
-	if (getTypePath(index) == 1 && checkFile(index, 4) == 0)
+	if (getTypePath(index) == 1 && checkFile(index, 4) == 0) // Mode 4 = lecture
 		return (0);
 
-	// path + index = chemin complet du fichier par concaténation
 	if (getTypePath(path + index) == 1 && checkFile(path + index, 4) == 0)
 		return (0);
 
