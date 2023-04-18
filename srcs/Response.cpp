@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 10:49:55 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/17 13:52:23 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/18 19:33:23 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,28 +64,27 @@ Connection: close
   <p>Ceci est un exemple de page web.</p>
 </body>
 </html>
-
 */
 
 // Definit le type de contenu de la reponse
-
 void	Response::contentType()
 {
 	_response_content.append("Content-Type: ");
 
 	// si "." --> extension --> recuperer le type MIME correspondant
 	if (_target_file.rfind(".", std::string::npos) != std::string::npos && _code == 200)
-		_response_content.append(_mime.getMimeType(_target_file.substr(_target_file.rfind(".", std::string::npos))) );
-	
+		_response_content.append(_mime.getMimeType(_target_file.substr(_target_file.rfind(".", std::string::npos))));
+
 	else
 		_response_content.append(_mime.getMimeType("default"));
 
 	_response_content.append("\r\n");
 }
 
+// Ajoute le header "Content-Length" à la réponse en spécifiant la taille du contenu en octets
 void	Response::contentLength()
 {
-	std::stringstream ss;
+	std::stringstream	ss;
 	ss << _response_body.length();
 
 	_response_content.append("Content-Length: ");
@@ -95,7 +94,7 @@ void	Response::contentLength()
 
 void	Response::connection()
 {
-	if(request.getHeader("connection") == "keep-alive")
+	if (request.getHeader("connection") == "keep-alive")
 		_response_content.append("Connection: keep-alive\r\n");
 }
 
@@ -110,23 +109,21 @@ void	Response::location()
 		_response_content.append("Location: "+ _location +"\r\n");
 }
 
-// Ajoute la date et l'heure courante au contenu de la reponse
-
+// Ajoute le header "Date" à la réponse
+// Date: Mon, 04 Apr 2023 12:34:56 UTC
 void	Response::date()
 {
 	char		date[1000];
 	time_t		now = time(0);
 	struct tm	tm = *gmtime(&now);
-	
+
 	strftime(date, sizeof(date), "%a, %d %b %Y %H:%M:%S %Z", &tm);
 
 	_response_content.append("Date: ");
 	_response_content.append(date);
 	_response_content.append("\r\n");
-
 }
 
-// uri encoding
 void	Response::setHeaders()
 {
 	contentType();
@@ -146,12 +143,11 @@ static bool	fileExists (const std::string& f)
 	return (file.good());
 }
 
-// Renvoie true si le path du fichier correspond a un repertoire
+// Renvoie true si le path du fichier correspond a un répertoire
 // Sinon false
-
 static bool	isDirectory(std::string path)
 {
-	// Stat = structure contenant des informations sur un fichier (taille, heure de modif, permissions...)
+	// stat = structure contenant des informations sur un fichier (taille, heure de modif, permissions...)
 	struct stat	file_stat;
 	
 	if (stat(path.c_str(), &file_stat) != 0)
@@ -161,8 +157,8 @@ static bool	isDirectory(std::string path)
 }
 
 // Check si la methode utilisee est autorisee en fonction de son emplacement
-// Retourne true + affecte 405 ("Method Not Allowed") a code si pas autorisee
-// Renvoie false sinon
+// Retourne true + affecte 405 à code ("Method Not Allowed") si pas autorisée
+// Retourne false sinon
 
 static bool	isAllowedMethod(HttpMethod &method, Location &location, short &code)
 {
@@ -181,16 +177,15 @@ static bool	isAllowedMethod(HttpMethod &method, Location &location, short &code)
 
 /**
 	@brief Check si l'objet Location contient une redirection vers une autre ressource
-
 	@return true si c'est le cas, false sinon
 
 	@example REQUETE
-					GET /index.php HTTP/1.1
-					Host: www.example.org
+					GET /old-pages/some-page.html HTTP/1.1
+					Host: example.com
 
-			REPONSE
+			 REPONSE
 					HTTP/1.1 301 Moved Permanently
-					Location: http://www.example.org/index.asp
+					Location: /new-pages/some-page.html
 */
 
 static bool	checkReturn(Location &loc, short &code, std::string &location)
@@ -220,13 +215,16 @@ static std::string combinePaths(std::string p1, std::string p2, std::string p3)
 	len1 = p1.length();
 	len2 = p2.length();
 
-	if (p1[len1 - 1] == '/' && (!p2.empty() && p2[0] == '/') )
+	// Si un path finit par "/" et que l'autre commence par "/"
+	// On supprime un "/" pour éviter les doublons
+
+	if (p1[len1 - 1] == '/' && (!p2.empty() && p2[0] == '/'))
 		p2.erase(0, 1);
 
 	if (p1[len1 - 1] != '/' && (!p2.empty() && p2[0] != '/'))
 		p1.insert(p1.end(), '/');
 
-	if (p2[len2 - 1] == '/' && (!p3.empty() && p3[0] == '/') )
+	if (p2[len2 - 1] == '/' && (!p3.empty() && p3[0] == '/'))
 		p3.erase(0, 1);
 
 	if (p2[len2 - 1] != '/' && (!p3.empty() && p3[0] != '/'))
@@ -236,8 +234,7 @@ static std::string combinePaths(std::string p1, std::string p2, std::string p3)
 	return (res);
 }
 
-// Remplace l'alias de la location par le path reel du fichier demande dans la requete
-
+// Remplace l'alias de l'emplacement par le path réel du fichier demande dans la requete
 static void	replaceAlias(Location &location, HttpRequest &request, std::string &target_file)
 {
 	target_file = combinePaths(location.getAlias(), request.getPath().substr(location.getPath().length()), "");
