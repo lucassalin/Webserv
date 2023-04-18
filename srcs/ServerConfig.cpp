@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:23:14 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/12 14:16:38 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/18 12:16:02 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ ServerConfig::ServerConfig(const ServerConfig &other)
 		this->_server_address = other._server_address;
 
 	}
-	return ;
+	return;
 }
 
 ServerConfig	&ServerConfig::operator=(const ServerConfig & rhs)
@@ -91,8 +91,6 @@ void	ServerConfig::setServerName(std::string server_name)
 	this->_server_name = server_name;
 }
 
-// Definit l'adresse IP du serveur
-
 void	ServerConfig::setHost(std::string parametr)
 {
 	checkToken(parametr);
@@ -103,12 +101,11 @@ void	ServerConfig::setHost(std::string parametr)
 	if (!isValidHost(parametr))
 		throw ErrorException("Wrong syntax: host");
 
-	// Convertit la string parametr en une adresse IP de type in_addr_t
+	// convertit la string parametr en une adresse IP de type in_addr_t
 	this->_host = inet_addr(parametr.data());
 }
 
-// Definit le dossier racine a partir d'une string root
-
+// Definit le repertoire racine du serveur
 void	ServerConfig::setRoot(std::string root)
 {
 	checkToken(root);
@@ -677,17 +674,18 @@ const std::vector<Location>::iterator	ServerConfig::getLocationKey(std::string k
 	throw ErrorException("Error: path to location not found");
 }
 
-// S'assure qu'un token (parametre) est bien forme avant de l'utiliser en config
+// Si ";" a la fin de la ligne de config --> la supprime (plus facile a manipuler si conversions etc)
+// Sinon leve une exception
+// Exemple : listen 8002;
 
 void	ServerConfig::checkToken(std::string &parametr)
 {
 	size_t	pos = parametr.rfind(';');
 
-	// Si la string ne se termine pas par ";" --> erreur
 	if (pos != parametr.size() - 1)
 		throw ErrorException("Token is invalid");
 
-	parametr.erase(pos); // on retire le ";" de la fin de string
+	parametr.erase(pos);
 }
 
 // Verifie si deux locations de ressources sur le serveur n'ont pas la meme path
@@ -742,4 +740,3 @@ void	ServerConfig::setupServer(void)
 		exit(EXIT_FAILURE);
 	}
 }
-

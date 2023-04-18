@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:22:41 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/08 15:38:49 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/18 12:02:22 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 #include "Webserv.hpp"
 
+// static car ces parametres ne changent pas 
+// selon les differentes instances de ServerConfig
 static std::string	serverParametrs[] = {"server_name", "listen", "root", "index", "allow_methods", "client_body_buffer_size"};
 
 class Location;

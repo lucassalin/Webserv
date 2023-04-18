@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 14:34:29 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/12 14:16:31 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/18 12:27:38 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ int	ConfigFile::checkFile(std::string const path, int mode)
 	@param index : nom du fichier
 
 	@return (0) si le fichier existe et que l'user a les permissions, (-1) sinon
- */
+*/
 
 int	ConfigFile::isFileExistAndReadable(std::string const path, std::string const index)
 {

@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 14:33:47 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/12 14:16:16 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/18 12:24:15 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 #define CONFIGFILE_HPP
 
 #include "Webserv.hpp"
+
+// Gere les fichiers de configuration du serveur
 
 class ConfigFile 
 {
