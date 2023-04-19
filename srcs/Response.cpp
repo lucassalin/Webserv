@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 10:49:55 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/18 19:33:23 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/19 11:08:25 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -248,9 +248,8 @@ static void	appendRoot(Location &location, HttpRequest &request, std::string &ta
 	target_file = combinePaths(location.getRootLocation(), request.getPath(), "");
 }
 
-// Initialise les variables d'env requises à l'exe du script CGI
-// Et l'execute
-// Est call lorsque la ressource demandée nécessite l'execution d'un script CGI
+// Initialise les variables d'env pour le script CGI, et l'execute
+// Utilise le chemin d'accès complet de la ressource demandée
 
 int	Response::handleCgiTemp(std::string &location_key)
 {
@@ -276,13 +275,11 @@ int	Response::handleCgiTemp(std::string &location_key)
 	return (0);
 }
 
-/**
-	@brief Gére l'exe du script CGI lorsqu'une requête est envoyée à notre serveur web
-
-	@example emplacement = /var/www/html ; location_key = html
-
-	@return (0) si réussite du script, (1) si échec
- */
+// Même objectif mais :
+// 1) Extrait le chemin d'accès de la ressource
+// 2) Vérifie qu'il se termine par la bonne extension (.py ou .sh)
+// 3) Ajoute le chemin d'accès à la localisation CGI spécifiée dans fichier de config
+// 4) Vérifie son accessibilité et ses permissions
 
 int	Response::handleCgi(std::string &location_key)
 {
@@ -372,7 +369,6 @@ int	Response::handleCgi(std::string &location_key)
         ...
     }
 }
-
 */
 
 static void	getLocationMatch(std::string &path, std::vector<Location> locations, std::string &location_key)
@@ -412,8 +408,6 @@ int	Response::handleTarget()
 		// (path de l'emplacement, méthode autorisée, extensions CGI autorisées ...)
 
 		Location	target_location = *_server.getLocationKey(location_key);
-
-		
 
 		if (isAllowedMethod(request.getMethod(), target_location, _code))
 		{
@@ -459,6 +453,7 @@ int	Response::handleTarget()
 
 			if (!target_location.getIndexLocation().empty())
 				_target_file += target_location.getIndexLocation();
+
 			else
 				_target_file += _server.getIndex();
 
@@ -484,8 +479,10 @@ int	Response::handleTarget()
 
 				if (!target_location.getIndexLocation().empty())
 					_location = combinePaths(request.getPath(), target_location.getIndexLocation(), "");
+					
 				else
 					_location = combinePaths(request.getPath(), _server.getIndex(), "");
+					
 				if (_location[_location.length() - 1] != '/')
 					_location.insert(_location.end(), '/');
 
@@ -497,6 +494,7 @@ int	Response::handleTarget()
 	else
 	{
 		_target_file = combinePaths(_server.getRoot(), request.getPath(), "");
+
 		if (isDirectory(_target_file))
 		{
 			if (_target_file[_target_file.length() - 1] != '/')
@@ -505,17 +503,21 @@ int	Response::handleTarget()
 				_location = request.getPath() + "/";
 				return (1);
 			}
+
 			_target_file += _server.getIndex();
+
 			if (!fileExists(_target_file))
 			{
 				_code = 403;
 				return (1);
 			}
+
 			if (isDirectory(_target_file))
 			{
 				_code = 301;
 				_location = combinePaths(request.getPath(), _server.getIndex(), "");
-				if(_location[_location.length() - 1] != '/')
+
+				if (_location[_location.length() - 1] != '/')
 					_location.insert(_location.end(), '/');
 				return (1);
 			}
@@ -595,7 +597,6 @@ void	Response::buildErrorBody()
 }
 
 // Construit la réponse HTTP à renvoyée au client
-
 void	Response::buildResponse()
 {
 	if (reqError() || buildBody())
@@ -674,8 +675,10 @@ int	Response::buildBody()
 
 	if (handleTarget())
 		return (1);
+
 	if (_cgi || _auto_index)
 		return (0);
+
 	if (_code)
 		return (0);
 
@@ -845,32 +848,39 @@ std::string	Response::removeBoundary(std::string &body, std::string &boundary)
 		for (size_t i = 0; i < body.size(); i++)
 		{
 			buffer.clear();
+			
 			while(body[i] != '\n')
 			{
 				buffer += body[i];
 				i++;
 			}
+			
 			if (!buffer.compare(("--" + boundary + "--\r")))
 			{
 				is_content = true;
 				is_boundary = false;
 			}
+			
 			if (!buffer.compare(("--" + boundary + "\r")))
 			{
 				is_boundary = true;
 			}
+			
 			if (is_boundary)
 			{
 				if (!buffer.compare(0, 31, "Content-Disposition: form-data;"))
 				{
-					size_t start = buffer.find("filename=\"");
+					size_t	start = buffer.find("filename=\"");
+
 					if (start != std::string::npos)
 					{
 						size_t end = buffer.find("\"", start + 10);
+						
 						if (end != std::string::npos)
 							filename = buffer.substr(start + 10, end);
 					}
 				}
+
 				else if (!buffer.compare(0, 1, "\r") && !filename.empty())
 				{
 					is_boundary = false;
@@ -884,11 +894,13 @@ std::string	Response::removeBoundary(std::string &body, std::string &boundary)
 				{
 					is_boundary = true;
 				}
+
 				else if (!buffer.compare(("--" + boundary + "--\r")))
 				{
 					new_body.erase(new_body.end() - 1);
 					break ;
 				}
+
 				else
 					new_body += (buffer + "\n");
 			}

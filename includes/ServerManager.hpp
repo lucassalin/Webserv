@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:09:07 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/12 14:16:26 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/19 11:10:56 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,10 @@
 #include "Client.hpp"
 #include "Response.hpp"
 
-/**
- @brief Responsable du fonctionnement principal du/des serveur(s) web
- 		1) Gére les connexions TCP et la communication serveur-clients
-		2) Configure le serveur via le fichier de config
-		3) Gére les requêtes entrantes/sortantes pour chaque client connecté
- */
+// Responsable du fonctionnement principal du/des serveur(s) web
+// 1) Gére les connexions TCP et la communication serveur-clients
+// 2) Configure le serveur via le fichier de config
+// 3) Gére les requêtes entrantes/sortantes pour chaque client connecté
 
 class ServerManager
 {

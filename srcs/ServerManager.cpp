@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:05:48 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/12 14:16:39 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/19 16:52:11 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@ ServerManager::ServerManager() {}
 ServerManager::~ServerManager() {}
 
 // Initialise tous les serveurs sur les ports spécifiés dans le fichier de configuration
-
 void	ServerManager::setupServers(std::vector<ServerConfig> servers)
 {
 	std::cout << std::endl;
@@ -54,25 +53,11 @@ void	ServerManager::setupServers(std::vector<ServerConfig> servers)
 		if (!serverDub)
 			it->setupServer();
 
-
-		// inet_ntop() convertit une ad IP binaire en une string lisible par l'homme
+		// inet_ntop() convertit une adresse IPv4 binaire en une string lisible par l'homme
 		Logger::logMsg(LIGHTMAGENTA, CONSOLE_OUTPUT, "Server Created: ServerName[%s] Host[%s] Port[%d]",it->getServerName().c_str(),
 				inet_ntop(AF_INET, &it->getHost(), buf, INET_ADDRSTRLEN), it->getPort());
 	}
 }
-
-/**
- * Runs main loop that goes through all file descriptors from 0 till the biggest fd in the set.
- * - check file descriptors returend from select():
- *      if server fd --> accept new client
- *      if client fd in read_set --> read message from client
- *      if client fd in write_set:
- *          1- If it's a CGI response and Body still not sent to CGI child process --> Send request body to CGI child process.
- *          2- If it's a CGI response and Body was sent to CGI child process --> Read outupt from CGI child process.
- *          3- If it's a normal response --> Send response to client.
- * - servers and clients sockets will be added to _recv_set_pool initially,
- *   after that, when a request is fully parsed, socket will be moved to _write_set_pool
- */
 
 /**
 	@brief Exécute la boucle principale du serveur qui surveille tous les fd associés aux serveurs & clients
@@ -89,8 +74,7 @@ void	ServerManager::setupServers(std::vector<ServerConfig> servers)
 
 	Les sockets serveurs/clients sont initialement add à _recv_set_pool.
 	Puis, lorsqu'une requête est entièrement parsée, le socket est déplacé vers _write_set_pool
-
- */
+*/
 
 void	ServerManager::runServers()
 {
@@ -99,7 +83,7 @@ void	ServerManager::runServers()
 	int		select_ret;
 
 	_biggest_fd = 0;
-	initializeSets(); // init l'ensemble des sockets a surveiller
+	initializeSets(); // initialise l'ensemble des sockets a surveiller
 
 	struct timeval	timer;
 
@@ -358,6 +342,7 @@ void	ServerManager::readRequest(const int &i, Client &c)
 		// la requete necessite l'exe d'un script CGI
 		// Le body de la requete doit etre envoye au script pour traitement
 		// Puis la reponse du script doit etre envoyee au client
+
 		if (c.response.getCgiState())
 		{
 			// le body de la requete est traite et stocke dans une variable tempo

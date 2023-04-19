@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/12 13:55:22 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/12 15:16:45 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/19 11:20:48 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -449,7 +449,6 @@ void	ConfigParser::createServer(std::string &config, ServerConfig &server)
 		throw ErrorException("Incorrect path for error page or number of error");
 }
 
-/* comparing strings from position */
 int	ConfigParser::stringCompare(std::string str1, std::string str2, size_t pos)
 {
 	size_t	i;
