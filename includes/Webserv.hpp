@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 15:16:42 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/12 14:16:27 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/20 12:55:14 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@
 # include "Mime.hpp"
 # include "Logger.hpp"
 
-#define CONNECTION_TIMEOUT 60 // Time in seconds before client get kicked out if no data was sent.
+#define CONNECTION_TIMEOUT 60 // Nombre de secondes au bout desquelles le client se fait déco si aucunes données n'ont été envoyées
 #ifdef TESTER
 	#define MESSAGE_BUFFER 40000 
 #else

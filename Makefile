@@ -1,17 +1,17 @@
 NAME =	webserv
 
-SRCS =	srcs/main.cpp 
-		srcs/Utils.cpp
-		srcs/ServerManager.cpp
-		srcs/Response.cpp
-		srcs/Client.cpp
+SRCS =	srcs/main.cpp \
+		srcs/Utils.cpp \
+		srcs/ServerManager.cpp \
+		srcs/Response.cpp \
+		srcs/Client.cpp \
 		srcs/HttpRequest.cpp \
-		srcs/ConfigFile.cpp
-		srcs/ConfigParser.cpp
-		srcs/ServerConfig.cpp
-		srcs/Location.cpp
+		srcs/ConfigFile.cpp \
+		srcs/ConfigParser.cpp \
+		srcs/ServerConfig.cpp \
+		srcs/Location.cpp \
 		srcs/CgiHandler.cpp \
-		srcs/Mime.cpp
+		srcs/Mime.cpp \
 		srcs/Logger.cpp
 
 HEADERS	= includes/Webserv.hpp

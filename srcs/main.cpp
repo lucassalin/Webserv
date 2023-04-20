@@ -6,16 +6,18 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/15 12:06:51 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/15 12:08:14 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/20 13:07:20 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Webserv.hpp"
 #include "ServerManager.hpp"
 
+// ne fait rien mais est nécessaire pour éviter que le programme ne s'arrête
+// si SIGPIPE reçu
 void    sigpipeHandle(int sig)
 {
-	if(sig) {}
+	if (sig) {}
 }
 
 int	main(int argc, char **argv) 
@@ -30,11 +32,13 @@ int	main(int argc, char **argv)
 			ServerManager 	master;
 			
 			signal(SIGPIPE, sigpipeHandle);
-			/* configuration file as argument or default path */
+
+			// si 1 seul argument --> config = configs/default.conf"
+			// sinon fichier précisé
 			config = (argc == 1 ? "configs/default.conf" : argv[1]);
 			
 			cluster.createCluster(config);
-			// cluster.print(); // for checking
+			// cluster.print(); // (pour checker)
 			master.setupServers(cluster.getServers());
 			master.runServers();
 		}
@@ -49,6 +53,6 @@ int	main(int argc, char **argv)
 		Logger::logMsg(RED, CONSOLE_OUTPUT, "Error: wrong arguments");
 		return (1);
 	}
-	
+
 	return (0);
 }
