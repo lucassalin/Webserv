@@ -6,14 +6,13 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 14:57:30 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/12 14:16:40 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/20 12:50:43 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Webserv.hpp"
 
 // Convertit une string en entier via un stream
-
 int ft_stoi(std::string str)
 {
 	std::stringstream	ss(str);
@@ -34,7 +33,6 @@ int ft_stoi(std::string str)
 }
 
 // Convertit un hexa en decimal
-
 unsigned int	fromHexToDec(const std::string& nb)
 {
 	unsigned int		x;
@@ -47,7 +45,6 @@ unsigned int	fromHexToDec(const std::string& nb)
 }
 
 // Renvoie la string correspondant au code d'erreur
-
 std::string	statusCodeString(short statusCode)
 {
 	switch (statusCode)
@@ -161,7 +158,6 @@ std::string	statusCodeString(short statusCode)
 
 // Retourne une string representant une page HTML d'erreur
 // en fonction du code de statut donné en entrée
-
 std::string	getErrorPage(short statusCode)
 {
 	return ("<html>\r\n<head><title>" + toString(statusCode) + " " +
@@ -170,7 +166,6 @@ std::string	getErrorPage(short statusCode)
 }
 
 // TODO avec les tests pour bien comprendre
-
 int	buildHtmlIndex(std::string &dir_name, std::vector<uint8_t> &body, size_t &body_len)
 {
 	struct dirent	*entityStruct;
@@ -202,34 +197,42 @@ int	buildHtmlIndex(std::string &dir_name, std::vector<uint8_t> &body, size_t &bo
 	struct stat	file_stat;
 	std::string	file_path;
 
-	while((entityStruct = readdir(directory)) != NULL)
+	while ((entityStruct = readdir(directory)) != NULL)
 	{
-		if(strcmp(entityStruct->d_name, ".") == 0)
+		if (strcmp(entityStruct->d_name, ".") == 0)
 			continue;
 
 		file_path = dir_name + entityStruct->d_name;
 		stat(file_path.c_str() , &file_stat);
+
 		dirListPage.append("<tr>\n");
 		dirListPage.append("<td>\n");
 		dirListPage.append("<a href=\"");
 		dirListPage.append(entityStruct->d_name);
+
 		if (S_ISDIR(file_stat.st_mode))
 			dirListPage.append("/");
+
 		dirListPage.append("\">");
 		dirListPage.append(entityStruct->d_name);
+
 		if (S_ISDIR(file_stat.st_mode))
 			dirListPage.append("/");
+
 		dirListPage.append("</a>\n");
 		dirListPage.append("</td>\n");
 		dirListPage.append("<td>\n");
 		dirListPage.append(ctime(&file_stat.st_mtime));
 		dirListPage.append("</td>\n");
 		dirListPage.append("<td>\n");
+
 		if (!S_ISDIR(file_stat.st_mode))
 			dirListPage.append(toString(file_stat.st_size));
+	
 		dirListPage.append("</td>\n");
 		dirListPage.append("</tr>\n");
 	}
+	
 	dirListPage.append("</table>\n");
 	dirListPage.append("<hr>\n");
 
@@ -238,5 +241,6 @@ int	buildHtmlIndex(std::string &dir_name, std::vector<uint8_t> &body, size_t &bo
 
 	body.insert(body.begin(), dirListPage.begin(), dirListPage.end());
 	body_len = body.size();
+
 	return (0);
 }

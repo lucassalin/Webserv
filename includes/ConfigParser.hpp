@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/10 14:11:00 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/12 14:16:17 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/20 12:17:13 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,8 @@
 
 class ServerConfig;
 
-// Lit et traite le fichier de config pour définir les paramètres de chaque serveur web créés
+// Lit et traite le fichier de config pour définir les paramètres
+// de chaque serveurs web créés
 
 class ConfigParser
 {
@@ -31,25 +32,24 @@ class ConfigParser
 		ConfigParser();
 		~ConfigParser();
 
-		int createCluster(const std::string &config_file);
-
-		void splitServers(std::string &content);
-		void removeComments(std::string &content);
-		void removeWhiteSpace(std::string &content);
-		size_t findStartServer(size_t start, std::string &content);
-		size_t findEndServer(size_t start, std::string &content);
-		void createServer(std::string &config, ServerConfig &server);
-		void checkServers();
+		int 						createCluster(const std::string &config_file);
+		void						splitServers(std::string &content);
+		void						removeComments(std::string &content);
+		void						removeWhiteSpace(std::string &content);
+		size_t						findStartServer(size_t start, std::string &content);
+		size_t						findEndServer(size_t start, std::string &content);
+		void						createServer(std::string &config, ServerConfig &server);
+		void						checkServers();
 		std::vector<ServerConfig>	getServers();
-		int	stringCompare(std::string str1, std::string str2, size_t pos);
-
-		int print();
+		int							stringCompare(std::string str1, std::string str2, size_t pos);
+		int 						print();
 
 		public:
 		class ErrorException : public std::exception
 		{
 			private:
 				std::string _message;
+
 			public:
 				ErrorException(std::string message) throw()
 				{
@@ -59,6 +59,7 @@ class ConfigParser
 				{
 					return (_message.c_str());
 				}
+
 				virtual ~ErrorException() throw() {}
 		};
 };

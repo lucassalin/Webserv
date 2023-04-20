@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:05:48 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/19 16:52:11 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/20 12:17:16 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,17 +60,20 @@ void	ServerManager::setupServers(std::vector<ServerConfig> servers)
 }
 
 /**
-	@brief Exécute la boucle principale du serveur qui surveille tous les fd associés aux serveurs & clients
+	@brief Boucle principale du serveur : surveille les fd associés aux serveurs & clients
 	et gére les événements associès à ces fd.
 
 	Check les fd renvoyés par select() :
+
+	1) Lecture :
 		- si server fd --> accepte le nouveau client
-		- si client fd in read_set --> lit le message du client
-		- si write_set :
-			1) si réponse CGI et que le body n'est toujours pas envoyé au processus enfant CGI
+		- si client fd --> le serveur traite la requête du client
+
+	2) Écriture :
+			- si réponse CGI et que le body n'est toujours pas envoyé au processus enfant CGI
 			   --> envoyé le body de la requête au processus enfant du CGI
-			2) si réponse CGI et body envoyé --> lire la sortie du processus enfant CGI
-			3) si réponse normale --> l'envoyer au client
+			- si réponse CGI et body envoyé --> lire la sortie du processus enfant CGI
+			- si réponse normale --> l'envoyer au client
 
 	Les sockets serveurs/clients sont initialement add à _recv_set_pool.
 	Puis, lorsqu'une requête est entièrement parsée, le socket est déplacé vers _write_set_pool
@@ -103,22 +106,34 @@ void	ServerManager::runServers()
 
 		for (int i = 0; i <= _biggest_fd; ++i)
 		{
+			// si le fd est prêt pour une opération de lecture et que c'est un fd de serveur
+			// --> on accepte la connexion
 			if (FD_ISSET(i, &recv_set_cpy) && _servers_map.count(i))
 				acceptNewConnection(_servers_map.find(i)->second);
 
+			// si fd de client --> le serveur lit la requête
 			else if (FD_ISSET(i, &recv_set_cpy) && _clients_map.count(i))
 				readRequest(i, _clients_map[i]);
 
+			// écriture
 			else if (FD_ISSET(i, &write_set_cpy) && _clients_map.count(i))
 			{
-				int cgi_state = _clients_map[i].response.getCgiState(); // 0->NoCGI 1->CGI write/read to/from script 2-CGI read/write done
+				int cgi_state = _clients_map[i].response.getCgiState();
 				
+				// Si cgi_state = 1 --> lecture/écriture à partir du script CGI
+				// Et que que le fd d'entrée du pipe est prêt pour l'écriture
+				// --> on envoie les données au script CGI
 				if (cgi_state == 1 && FD_ISSET(_clients_map[i].response._cgi_obj.pipe_in[1], &write_set_cpy))
 					sendCgiBody(_clients_map[i], _clients_map[i].response._cgi_obj);
-				
+
+				// si fd d'entrée du pipe est prêt pour la lecture
+				// --> on lit la réponse du script CGI
 				else if (cgi_state == 1 && FD_ISSET(_clients_map[i].response._cgi_obj.pipe_out[0], &recv_set_cpy))
 					readCgiResponse(_clients_map[i], _clients_map[i].response._cgi_obj);
-				
+
+				// Si 0 = pas de CGI & 2 = lecture/écriture CGI terminée
+				// Et que fd prêt pour écriture
+				// --> on envoie la réponse au client
 				else if ((cgi_state == 0 || cgi_state == 2)  && FD_ISSET(i, &write_set_cpy))
 					sendResponse(i, _clients_map[i]);
 			}
@@ -143,9 +158,9 @@ void	ServerManager::checkTimeout()
 	}
 }
 
-// Initialise recv/write_fd_pool
+// Initialise les ensembles de fd lecture/écriture
 // Et ajoute tous les sockets d'écoute à _recv_fd_pool
-// Est call lors de l'initialisation des serveurs
+// Utilisée lors de l'initialisation des serveurs
 
 void	ServerManager::initializeSets()
 {
@@ -161,6 +176,7 @@ void	ServerManager::initializeSets()
 			exit(EXIT_FAILURE);
 		}
 
+		// set le fd en mode non bloquant
 		if (fcntl(it->getFd(), F_SETFL, O_NONBLOCK) < 0)
 		{
 			Logger::logMsg(RED, CONSOLE_OUTPUT, "webserv: fcntl error: %s   Closing....", strerror(errno));
@@ -377,7 +393,6 @@ void	ServerManager::handleReqBody(Client &c)
 }
 
 // Envoie le corps de la requete au script CGI
-
 void	ServerManager::sendCgiBody(Client &c, CgiHandler &cgi)
 {
 	int			bytes_sent;
@@ -419,7 +434,6 @@ void	ServerManager::sendCgiBody(Client &c, CgiHandler &cgi)
 }
 
 // Lit les outputs produits par le script CGI
-
 void	ServerManager::readCgiResponse(Client &c, CgiHandler &cgi)
 {
 	char	buffer[MESSAGE_BUFFER * 2];
@@ -471,8 +485,6 @@ void	ServerManager::readCgiResponse(Client &c, CgiHandler &cgi)
 }
 
 // Ajoute un fd (i) à l'ensemble de fd spécifié (set)
-// Si ce fd est plus grand que le plus grand des fd, on m.a.j _biggest_fd
-
 void	ServerManager::addToSet(const int i, fd_set &set)
 {
 	FD_SET(i, &set);
@@ -482,11 +494,11 @@ void	ServerManager::addToSet(const int i, fd_set &set)
 }
 
 // Supprime un fd de l'ensemble de fd spécifié
-// Si ce fd est == _biggest_fd, on décrémente _biggest_fd pour garantir que sa valeur reste à jour
-
 void	ServerManager::removeFromSet(const int i, fd_set &set)
 {
 	FD_CLR(i, &set);
+
+	// on décrémente _biggest_fd pour garantir que sa valeur reste à jour
 	if (i == _biggest_fd)
 		_biggest_fd--;
 }

@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/12 13:55:22 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/19 11:20:48 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/20 12:50:27 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ ConfigParser::ConfigParser()
 ConfigParser::~ConfigParser() {}
 
 /**
-	@brief Affiche les configurations des serveurs et des emplacements contenues dans ConfigParser
+	@brief Affiche les configurations des serveurs
 
 	@example	------------- Config -------------
 				Server #1
@@ -126,12 +126,13 @@ int	ConfigParser::createCluster(const std::string &config_file)
 	if (content.empty())
 		throw ErrorException("File is empty");
 
+	// clean le fichier de config
 	removeComments(content);
 	removeWhiteSpace(content);
 	splitServers(content);
 
 	if (this->_server_config.size() != this->_nb_server)
-		throw ErrorException("Somthing with size"); //rewrite the sentence
+		throw ErrorException("Number of server configurations doesn't match the number of servers");
 
 	for (size_t i = 0; i < this->_nb_server; i++)
 	{
@@ -142,10 +143,11 @@ int	ConfigParser::createCluster(const std::string &config_file)
 
 	if (this->_nb_server > 1)
 		checkServers();
+
 	return (0);
 }
 
-// Supprime les commentaires de "#" à "\n"
+// Supprime les commentaires du fichier de config (de "#" à "\n")
 void	ConfigParser::removeComments(std::string &content)
 {
 	size_t	pos;
@@ -178,14 +180,16 @@ void	ConfigParser::removeWhiteSpace(std::string &content)
 }
 
 /**
-	@brief Découpe le contenu d'un fichier de config en plusieurs config distinctes
+	@brief Divise les différentes configs en configs distinctes
 
-	@example	server {
+	@example	server
+				{
     				host example.com;
     				port 8080;
 				}
 
-				server {
+				server
+				{
     				host example.org;
     				port 80;
 				}
@@ -339,13 +343,13 @@ void	ConfigParser::createServer(std::string &config, ServerConfig &server)
 			i++;
 
 			if (parametrs[i] == "{" || parametrs[i] == "}")
-				throw  ErrorException("Wrong character in server scope{}");
+				throw  ErrorException("Wrong character in server scope {}");
 
 			path = parametrs[i];
 			std::vector<std::string>	codes;
 			
 			if (parametrs[++i] != "{")
-				throw  ErrorException("Wrong character in server scope{}");
+				throw  ErrorException("Wrong character in server scope {}");
 
 			i++;
 
@@ -355,7 +359,7 @@ void	ConfigParser::createServer(std::string &config, ServerConfig &server)
 			server.setLocation(path, codes);
 
 			if (i < parametrs.size() && parametrs[i] != "}")
-				throw  ErrorException("Wrong character in server scope{}");
+				throw  ErrorException("Wrong character in server scope {}");
 
 			flag_loc = 0;
 		}
@@ -371,6 +375,7 @@ void	ConfigParser::createServer(std::string &config, ServerConfig &server)
 		{
 			if (!server.getRoot().empty())
 				throw  ErrorException("Root is duplicated");
+
 			server.setRoot(parametrs[++i]);
 		}
 
@@ -379,10 +384,12 @@ void	ConfigParser::createServer(std::string &config, ServerConfig &server)
 			while (++i < parametrs.size())
 			{
 				error_codes.push_back(parametrs[i]);
+
 				if (parametrs[i].find(';') != std::string::npos)
 					break ;
+
 				if (i + 1 >= parametrs.size())
-					throw ErrorException("Wrong character out of server scope{}");
+					throw ErrorException("Wrong character out of server scope {}");
 			}
 		}
 
@@ -390,6 +397,7 @@ void	ConfigParser::createServer(std::string &config, ServerConfig &server)
 		{
 			if (flag_max_size)
 				throw  ErrorException("Client_max_body_size is duplicated");
+
 			server.setClientMaxBodySize(parametrs[++i]);
 			flag_max_size = true;
 		}
@@ -398,6 +406,7 @@ void	ConfigParser::createServer(std::string &config, ServerConfig &server)
 		{
 			if (!server.getServerName().empty())
 				throw  ErrorException("Server_name is duplicated");
+
 			server.setServerName(parametrs[++i]);
 		}
 
@@ -405,6 +414,7 @@ void	ConfigParser::createServer(std::string &config, ServerConfig &server)
 		{
 			if (!server.getIndex().empty())
 				throw  ErrorException("Index is duplicated");
+
 			server.setIndex(parametrs[++i]);
 		}
 
@@ -412,6 +422,7 @@ void	ConfigParser::createServer(std::string &config, ServerConfig &server)
 		{
 			if (flag_autoindex)
 				throw ErrorException("Autoindex of server is duplicated");
+
 			server.setAutoindex(parametrs[++i]);
 			flag_autoindex = true;
 		}
@@ -449,6 +460,7 @@ void	ConfigParser::createServer(std::string &config, ServerConfig &server)
 		throw ErrorException("Incorrect path for error page or number of error");
 }
 
+// Renvoie (0) si les strings correspondent, sinon (1)
 int	ConfigParser::stringCompare(std::string str1, std::string str2, size_t pos)
 {
 	size_t	i;
@@ -465,8 +477,8 @@ int	ConfigParser::stringCompare(std::string str1, std::string str2, size_t pos)
 	return (1);
 }
 
-// Check les doublons de serveurs
-// S'assure que chaque serveur a les paramètres obligatoires
+// Check si deux serveurs ont les mêmes paramètres de configs (même host etc.)
+// Lève une exception si c'est le cas
 
 void	ConfigParser::checkServers()
 {
