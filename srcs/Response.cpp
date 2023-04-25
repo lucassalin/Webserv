@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 10:49:55 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/19 11:08:25 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/25 16:21:05 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -585,7 +585,7 @@ void	Response::buildErrorBody()
 
 			_target_file = _server.getRoot() +_server.getErrorPages().at(_code);
 			short	old_code = _code;
-			
+
 			// charge le contenu du fichier d'erreur personnalisé
 			// dans la variable _response_body
 			if (readFile())
@@ -687,7 +687,7 @@ int	Response::buildBody()
 		if (readFile())
 			return (1);
 	}
-	
+
 	else if (request.getMethod() == POST || request.getMethod() == PUT)
 	{
 		if (fileExists(_target_file) && request.getMethod() == POST)
@@ -715,7 +715,7 @@ int	Response::buildBody()
 			file.write(request.getBody().c_str(), request.getBody().length());
 		}
 	}
-	
+
 	else if (request.getMethod() == DELETE)
 	{
 		if (!fileExists(_target_file))

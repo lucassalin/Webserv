@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:05:48 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/20 12:17:16 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/25 14:29:06 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -232,7 +232,7 @@ void	ServerManager::acceptNewConnection(ServerConfig &serv)
 	_clients_map.insert(std::make_pair(client_sock, new_client));
 }
 
-/* Closes connection from fd i and remove associated client object from _clients_map */
+// Ferme la connexion du fd "i" et supprime l'objet Client associe de _clients_map
 void	ServerManager::closeConnection(const int i)
 {
 	if (FD_ISSET(i, &_write_fd_pool))
@@ -268,7 +268,6 @@ void	ServerManager::sendResponse(const int &i, Client &c)
 
 	else if (bytes_sent == 0 || (size_t) bytes_sent == response.length())
 	{
-		// Logger::logMsg(LIGHTMAGENTA, CONSOLE_OUTPUT, "sendResponse() Done sending ");
 		Logger::logMsg(CYAN, CONSOLE_OUTPUT, "Response Sent To Socket %d, Stats=<%d>"
 		, i, c.response.getCode());
 
@@ -374,7 +373,6 @@ void	ServerManager::readRequest(const int &i, Client &c)
 }
 
 // Est utilisee lorsqu'une requête contenant un body (POST par ex) doit etre traitee par un CGI
-
 void	ServerManager::handleReqBody(Client &c)
 {
 		// taille du body == 0 --> le body n'est pas lu depuis le socket client
