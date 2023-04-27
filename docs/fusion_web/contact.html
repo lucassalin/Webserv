@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<link rel="stylesheet" href="assets/css/style.css">
+		<link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+		<title>SaladeTomatesOignons</title>
+	</head>
+
+	<body>
+		<header class="header">
+			<div class="container">
+				<div class ="header__inner">
+					<a class = "nav__link__dop" href="tours/tours.html">Photos</a>
+					<nav class="nav">
+						<a class="nav__link__dop" href="index.html">Accueil</a>
+						<a class="nav__link__dop" href="file_download.html">Download</a>
+						<a class="nav__link__dop" href="about.html">À propos</a>
+						<a class="nav__link__dop" href="contact.html">Contact</a>
+					</nav>
+				</div>
+			</div>
+		</header>
+
+		<div class="pass__block">
+		<h1> CGI: </h1> <br />
+
+	<!-- Formulaire enregistrement nom/prénom -->
+	<form action = "../cgi-bin/get_hello.py" method = "get">
+		First Name: <input type = "text" name = "first_name">  <br />
+		<br>
+		Last Name: <input type = "text" name = "last_name" />
+		<input type = "submit" value = "Submit" /> <br />
+	</form>
+
+	<br />
+	<br />
+	<br />
+	<br />
+</div>
+
+</body>
+</html>

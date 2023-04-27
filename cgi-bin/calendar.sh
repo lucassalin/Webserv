@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Affiche un calendrier, la date actuelle
-# ainsi que le nombre de jours passés depuis le début de l'annee
-
 echo -e 'HTTP/1.1 200 OK'
 echo -e 'Content-Type: text/html\r\n\r\n'
 

@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 14:34:29 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/18 13:08:59 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/27 11:55:52 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,25 @@ int	ConfigFile::isFileExistAndReadable(std::string const path, std::string const
 		return (0);
 
 	return (-1);
+}
+
+// Lit le contenu d'un fichier specifie par le path
+// Renvoie le contenu du fichier : vide si path vide/echec ouverture/autre erreur
+
+std::string	ConfigFile::readFile(std::string path)
+{
+	if (path.empty() || path.length() == 0)
+		return (NULL);
+
+	std::ifstream	config_file(path.c_str());
+
+	if (!config_file || !config_file.is_open())
+		return (NULL);
+
+	std::stringstream	stream_binding;
+	stream_binding << config_file.rdbuf();
+
+	return (stream_binding.str());
 }
 
 std::string	ConfigFile::getPath()

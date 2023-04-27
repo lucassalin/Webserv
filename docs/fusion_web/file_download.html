@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="assets/css/style.css">
+	<link rel="stylesheet" href="assets/css/serv.css">
+	<link href="https://fonts.googleapis.com/css2?family=Kaushan+Script&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+	<title>SaladeTomatesOignons</title>
+</head>
+<body>
+
+<header class="header">
+	<div class="container">
+		<div class ="header__inner">
+			<a class = "nav__link__dop" href="tours/tours.html">Photos</a>
+			<nav class="nav">
+				<a class="nav__link__dop" href="index.html">Accueil</a>
+				<a class="nav__link__dop" href="file_download.html">Download</a>
+				<a class="nav__link__dop" href="about.html">À propos</a>
+				<a class="nav__link__dop" href="contact.html">Contact</a>
+			</nav>
+		</div>
+	</div>
+</header>
+
+<div class="sub_div">
+
+	<!-- <h1 id="header"></h1> -->
+
+	<!-- Formulaire permettant a l'user d'envoyer un fichier via POST
+		 - enctype="multipart/form-data" pour envoyer des fichiers binaires (requis par POST)
+		 - action = "../cgi-bin/upload.py" upload.py traitera les donnees du formulaire enregistrees
+		 - class="form-control" ajoute une classe pour un style css au formulaire
+		 - input type="submit" value="SEND" href="#" ajoute le bouton d'envoi -->
+
+	<form enctype="multipart/form-data" action = "../cgi-bin/upload.py" method="post" >
+		<p>File: <input type="file" name="filename" id="fileid" class="form-control">
+			<input type="submit" value="SEND" href="#"></p>
+	</form>
+
+</div>
+
+</body>
+</html>

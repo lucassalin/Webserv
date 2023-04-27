@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 15:16:42 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/25 14:05:08 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/27 11:35:07 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,8 +80,7 @@ std::string toString(const T val)
 	return stream.str();
 }
 
-/* Utils.c */
-
+// Utils.c
 std::string		statusCodeString(short);
 std::string		getErrorPage(short);
 int				buildHtmlIndex(std::string &, std::vector<uint8_t> &, size_t &);
