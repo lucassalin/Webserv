@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/12 15:25:15 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/27 11:49:00 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/27 12:48:02 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,29 +68,18 @@ void	Logger::logMsg(const char *color, Mode m, const char *msg, ...)
 		}
 
 		else if (m == CONSOLE_OUTPUT)
-		{
-			// Pas utilise
-			// if (p == DEBUG)
-			//     std::cout << LIGHTMAGENTA;
-			// else if (p == INFO)
-			//     std::cout << CYAN;
-			// else if (p == ERROR)
-			//     std::cout << RED;
 			std::cout << color << getCurrTime() << output << RESET << std::endl;
-		}
+
 		va_end(args);
 	}
 }
 
 std::string	Logger::getCurrTime()
 {
-	tzset();
-	
 	char		date[1000];
 	time_t		now = time(0);
-	struct tm	tm = *gmtime(&now);
-	
-	tm.tm_hour = tm.tm_hour + GST;
+	struct tm	tm = *localtime(&now);
+
 	strftime(date, sizeof(date), "[%Y-%m-%d  %H:%M:%S]   ", &tm);
 
 	return (std::string(date));

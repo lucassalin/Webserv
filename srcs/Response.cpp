@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 10:49:55 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/27 11:48:33 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/04/27 13:51:29 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -425,14 +425,11 @@ int	Response::handleTarget()
 			return (1);
 
 		if (target_location.getPath().find("cgi-bin") != std::string::npos)
-		{
 			return (handleCgi(location_key));
-		}
 
 		if (!target_location.getAlias().empty())
-		{
 			replaceAlias(target_location, request, _target_file);
-		}
+
 		else
 			appendRoot(target_location, request, _target_file);
 
@@ -580,7 +577,7 @@ void	Response::buildErrorBody()
 				if (_location[0] != '/')
 					_location.insert(_location.begin(), '/');
 
-				_code = 302;
+				_code = 404;
 			}
 
 			_target_file = _server.getRoot() +_server.getErrorPages().at(_code);
