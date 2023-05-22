@@ -1,5 +1,5 @@
 # 42-webserv
-Ressources :
+HTTP :
 
 - https://developer.mozilla.org/fr/docs/Web/HTTP <br>
 - https://httpwg.org/specs/rfc9110.html <br>
