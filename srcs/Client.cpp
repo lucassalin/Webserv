@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 15:03:26 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/27 11:48:31 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/05/01 11:18:34 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,8 @@ Client	&Client::operator=(const Client & rhs)
 }
 
 // Initialisation d'un nouvel objet Client
-// avec la config du serveur donné en paramètre
+// avec la config du serveur donnée en paramètre
+
 Client::Client(ServerConfig &server)
 {
 	setServer(server);

@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 11:01:04 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/27 14:36:07 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/05/01 11:18:15 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,7 +242,6 @@ void	CgiHandler::initEnv(HttpRequest& req, const std::vector<Location>::iterator
 }
 
 // Execute le script CGI
-
 void	CgiHandler::execute(short &error_code)
 {
 	if (this->_argv[0] == NULL || this->_argv[1] == NULL)
