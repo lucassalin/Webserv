@@ -17,11 +17,11 @@ Download un fichier local vers le dossier du projet et le recuperer :
 - curl -X GET http://localhost:8002/test.txt
 - curl -X DELETE http://localhost:8002/test.txt
 
-TESTS SCRIPT PYTON !
+TESTS SCRIPT PYTON
 - http://localhost:8002/cgi-bin/get_hello.py
 - ...
 
-TEST AUTO-INDEXATION !
+TEST AUTO-INDEXATION
 - http://localhost:8002/red --> liste les fichiers de /tours
 
 TESTS SIEGE
