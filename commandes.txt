@@ -1,0 +1,30 @@
+Se connecter au navigateur avec un hostname different --> curl --resolve random1:8003:127.0.0.1 http://random1:8003
+
+Provoquer des erreurs :
+- curl -X GET http://localhost:8002/nexistepas.html --> 404 (Page not found)
+- curl -X "INVALID_METHOD" http://localhost:8002 --> 501 (Not implemented)
+- curl -X POST -H "Content-Type: text/plain" --data "123456" http://localhost:8002 --> trop de chars
+- curl -X POST -H "Content-Type: text/plain" --data "1234" http://localhost:8002 --> fonctionne ! (code 204)
+
+TEST POST
+- curl –X POST http://localhost:8002/test.txt -d “Bonsoir le monde” --> trop de chars
+
+TEST HEAD
+- curl -I -X HEAD http://localhost:8002/tours/indexx1.html --> renvoie juste le header et code 200 !
+
+Download un fichier local vers le dossier du projet et le recuperer :
+- curl -X POST -H "Content-Type: application/octet-stream" --data-binary "@/mnt/nfs/homes/lsalin/test.txt" http://localhost:8002/test.txt
+- curl -X GET http://localhost:8002/test.txt
+- curl -X DELETE http://localhost:8002/test.txt
+
+TESTS SCRIPT PYTON !
+- http://localhost:8002/cgi-bin/get_hello.py
+- ...
+
+TEST AUTO-INDEXATION !
+- http://localhost:8002/red --> liste les fichiers de /tours
+
+TESTS SIEGE
+- siege -c 100 -b -t1M http://localhost:8002 --> stress test requetes
+- top -p PID --> memory leaks
+- netstat -ant --> connexions en attente
