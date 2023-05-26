@@ -1,3 +1,14 @@
+int select(int nfds, fd_set *readfds, fd_set *writefds, NULL, struct timeval *timeout) 
+
+- nfds : nombre de descripteurs de fichiers a surveiller (readfds + writefds + 1) 
+- readfds : pointeur vers objet de type FD_SET (ensemble de fds a surveiller pour une disponibilite lecture). 
+- writefds
+- timeout : temps de surveillance maximum. 
+
+Renvoie le nombre de fds prets pour des operations d’E/S, (0)  en cas de delai d’attente ou (-1) en cas d'erreur. 
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+
 Se connecter au navigateur avec un hostname different --> curl --resolve random1:8003:127.0.0.1 http://random1:8003
 
 Provoquer des erreurs :
