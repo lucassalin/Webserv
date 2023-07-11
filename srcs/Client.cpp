@@ -6,13 +6,12 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/11 15:03:26 by lsalin            #+#    #+#             */
-/*   Updated: 2023/05/01 11:18:34 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/07/11 13:30:06 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-// time(NULL) = heure actuelle
 Client::Client()
 {
 	_last_msg_time = time(NULL);
@@ -48,9 +47,6 @@ Client	&Client::operator=(const Client & rhs)
 	}
 	return (*this);
 }
-
-// Initialisation d'un nouvel objet Client
-// avec la config du serveur donnée en paramètre
 
 Client::Client(ServerConfig &server)
 {

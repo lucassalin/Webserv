@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 15:16:42 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/27 11:35:07 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/07/11 13:30:50 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,14 +15,12 @@
 # define WEBSERV_HPP
 
 # include <iostream>
-// # include <fstream>
 # include <fcntl.h>
 # include <cstring>
 # include <string> 
 # include <unistd.h>
 # include <dirent.h>
 # include <sstream>
-// # include <bits/stdc++.h>
 # include <cstdlib>
 # include <fstream>
 # include <sstream>
@@ -44,7 +42,6 @@
 # include <sys/stat.h>
 # include <sys/time.h>
 # include <unistd.h>
-// # include <machine/types.h>
 # include <signal.h>
 
 /* Network */
@@ -62,7 +59,7 @@
 # include "Mime.hpp"
 # include "Logger.hpp"
 
-#define CONNECTION_TIMEOUT 60 // Nombre de secondes au bout desquelles le client se fait déco si aucunes données n'ont été envoyées
+#define CONNECTION_TIMEOUT 60
 #ifdef TESTER
 	#define MESSAGE_BUFFER 40000 
 #else
@@ -80,7 +77,6 @@ std::string toString(const T val)
 	return stream.str();
 }
 
-// Utils.c
 std::string		statusCodeString(short);
 std::string		getErrorPage(short);
 int				buildHtmlIndex(std::string &, std::vector<uint8_t> &, size_t &);

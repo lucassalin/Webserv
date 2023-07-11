@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 16:50:27 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/17 13:16:16 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/07/11 13:30:20 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,12 @@
 
 enum HttpMethod
 {
-	GET,	// GET = 0
-	POST,	// POST = 1
-	DELETE,	// DELETE = 2
-	PUT,	// PUT = 3
-	HEAD,	// HEAD = 4
-	NONE	// NONE = 5
+	GET,
+	POST,
+	DELETE,
+	PUT,
+	HEAD,
+	NONE
 };
 
 enum ParsingState
@@ -64,10 +64,6 @@ enum ParsingState
 	Parsing_Done
 };
 
-// Parse et stocke le contenu de la requête
-// Déclenche un flag quand le parsing est terminé
-// Si une erreur est trouvée, _code est actualisé
-
 class HttpRequest
 {
 	public:
@@ -99,39 +95,35 @@ class HttpRequest
 		bool        keepAlive();
 		void        cutReqBody(int bytes);
 
-	private:
-
-		// URI = http://www.example.com/index.html/search?q=example#chapter1
+	private:	
+		std::string                         _path;
+		std::string                         _query;
+		std::string                         _fragment;
 	
-		std::string                         _path;		// http://www.example.com/index.html
-		std::string                         _query; 	// search?q=example (optional)
-		std::string                         _fragment;	// #chapter1 (optional)
-	
-		std::map<std::string, std::string>	_request_headers;	// key = nom du header & value = valeur du header
-		std::vector<u_int8_t>               _body; 				// unsigned int de 8 bits par convention
+		std::map<std::string, std::string>	_request_headers;
+		std::vector<u_int8_t>               _body;
 		std::string                         _boundary;
 		HttpMethod                          _method;
-		std::map<u_int8_t, std::string>     _method_str;		// Les valeurs des méthodes sont associées à des strings (+ pratique)
+		std::map<u_int8_t, std::string>     _method_str;
 		ParsingState                        _state;
 		size_t                              _max_body_size;
 		size_t                              _body_length;
-		short                               _error_code;	// short car max 100-599
+		short                               _error_code;
 		size_t                              _chunk_length;
-		std::string                         _storage;		// stockage temporaire des données du parsing
-		std::string                         _key_storage;	// stocke temporairement le header name (reinit à chaque nouveau header parsé)
-		short                               _method_index;	// suit le parsing de la méthode
+		std::string                         _storage;
+		std::string                         _key_storage;
+		short                               _method_index;
 		u_int8_t                            _ver_major;
 		u_int8_t                            _ver_minor;
 		std::string                         _server_name;
 		std::string                         _body_str;
 		
-		/* flags */
-		bool                                _fields_done_flag;	// True = tous les headers ont été analysés & stockés
-		bool                                _body_flag;			// True = la requête contient un body
-		bool                                _body_done_flag;	// True = le body a été correctement analysé
-		bool                                _complete_flag;		// True = requête entièrement analysée
-		bool                                _chunked_flag;		// True = la requête utilise l'encodage chunk
-		bool                                _multiform_flag;	// True = la requête est au format MIME multipart/form-data
+		bool                                _fields_done_flag;
+		bool                                _body_flag;
+		bool                                _body_done_flag;
+		bool                                _complete_flag;
+		bool                                _chunked_flag;
+		bool                                _multiform_flag;
 
 		void	_handle_headers();
 

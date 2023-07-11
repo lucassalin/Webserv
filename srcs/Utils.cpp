@@ -6,13 +6,12 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 14:57:30 by lsalin            #+#    #+#             */
-/*   Updated: 2023/05/25 11:11:38 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/07/11 13:33:07 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Webserv.hpp"
 
-// Convertit une string en entier via un stream
 int ft_stoi(std::string str)
 {
 	std::stringstream	ss(str);
@@ -32,7 +31,6 @@ int ft_stoi(std::string str)
 	return (res);
 }
 
-// Convertit un hexa en decimal
 unsigned int	fromHexToDec(const std::string& nb)
 {
 	unsigned int		x;
@@ -44,7 +42,6 @@ unsigned int	fromHexToDec(const std::string& nb)
 	return (x);
 }
 
-// Renvoie la string correspondant au code d'erreur
 std::string	statusCodeString(short statusCode)
 {
 	switch (statusCode)
@@ -156,8 +153,6 @@ std::string	statusCodeString(short statusCode)
 		}
 }
 
-// Retourne une string representant une page HTML d'erreur
-// en fonction du code de statut donné en entrée
 std::string	getErrorPage(short statusCode)
 {
 	return ("<html>\r\n<head><title>" + toString(statusCode) + " " +
@@ -165,7 +160,6 @@ std::string	getErrorPage(short statusCode)
 			"<center><h1>" + toString(statusCode) + " " + statusCodeString(statusCode) + "</h1></center>\r\n");
 }
 
-// TODO avec les tests pour bien comprendre
 int	buildHtmlIndex(std::string &dir_name, std::vector<uint8_t> &body, size_t &body_len)
 {
 	struct dirent	*entityStruct;
@@ -228,7 +222,7 @@ int	buildHtmlIndex(std::string &dir_name, std::vector<uint8_t> &body, size_t &bo
 
 		if (!S_ISDIR(file_stat.st_mode))
 			dirListPage.append(toString(file_stat.st_size));
-	
+
 		dirListPage.append("</td>\n");
 		dirListPage.append("</tr>\n");
 	}

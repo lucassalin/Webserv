@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/08 14:48:47 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/08 14:56:02 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/07/11 13:26:29 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,6 @@ Mime::Mime()
 	_mime_types[".pdf"] = "application/pdf";
 	_mime_types["default"] = "text/html";
 }
-
-// Determine le type MIME d'un fichier en fonction de son extension
 
 std::string	Mime::getMimeType(std::string extension)
 {

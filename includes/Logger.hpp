@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/10 14:10:55 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/14 09:53:03 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/07/11 13:30:23 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@
 #define LIGHTMAGENTA	"\x1B[95m"
 #define GST				4;
 
-// Pas utilise
 enum LogPrio
 {
 	DEBUG,
@@ -47,15 +46,13 @@ enum Mode
 	FILE_OUTPUT
 };
 
-// Classe de journalisation
-
 class Logger
 {
 	public:
-		static std::string						file_name;	// fichier de sortie pour les journaux
-		static LogPrio							prio;		// priorite du journal
-		static std::map<LogPrio, std::string>	prio_str;	// map priorite journal-string correspondante
-		static L_State							state;		// etat du journal
+		static std::string						file_name;
+		static LogPrio							prio;
+		static std::map<LogPrio, std::string>	prio_str;
+		static L_State							state;
 
 		static void			setFilenName(std::string);
 		static void			setState(L_State);

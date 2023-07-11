@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:09:07 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/19 11:10:56 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/07/11 13:30:47 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,6 @@
 #include "Webserv.hpp"
 #include "Client.hpp"
 #include "Response.hpp"
-
-// Responsable du fonctionnement principal du/des serveur(s) web
-// 1) Gére les connexions TCP et la communication serveur-clients
-// 2) Configure le serveur via le fichier de config
-// 3) Gére les requêtes entrantes/sortantes pour chaque client connecté
 
 class ServerManager
 {
@@ -32,11 +27,11 @@ class ServerManager
 
 	private:
 		std::vector<ServerConfig>	_servers;
-		std::map<int, ServerConfig>	_servers_map;	// associe un fd à la config de son serveur correspondant
-		std::map<int, Client>		_clients_map;	// associe un fd à un objet Client
-		fd_set						_recv_fd_pool;	// ensemble de fd pour les sockets en attente de lecture
-		fd_set						_write_fd_pool;	// ensemble de fd pour les sockets en attente d'écriture
-		int							_biggest_fd;	// nombre max de fd à surveiller par select()
+		std::map<int, ServerConfig>	_servers_map;
+		std::map<int, Client>		_clients_map;
+		fd_set						_recv_fd_pool;
+		fd_set						_write_fd_pool;
+		int							_biggest_fd;
 
 		void	acceptNewConnection(ServerConfig &);
 		void	checkTimeout();

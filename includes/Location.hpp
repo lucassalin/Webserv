@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:24:47 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/17 15:19:00 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/07/11 13:30:22 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,24 +15,22 @@
 
 #include "Webserv.hpp"
 
-// Gere les configs specifiques d'un emplacement dans notre serveur
-
 class Location
 {
 	private:
-		std::string					_path; // chemin relatif de l'emplacement
-		std::string					_root; // chemin absolu de l'emplacement
+		std::string					_path;
+		std::string					_root;
 		bool						_autoindex;
-		std::string					_index; // nom du fichier à utiliser comme page d'accueil pour cet emplacement
+		std::string					_index;
 		std::vector<short>			_methods;
-		std::string					_return; // redirection a appliquer pour cet emplacement
+		std::string					_return;
 		std::string					_alias;
-		std::vector<std::string>	_cgi_path; // vecteur contenant les chemins des scripts CGI pour cet emplacement
-		std::vector<std::string>	_cgi_ext; // vecteur contenant les extensions de fichiers pour les scripts CGI de cet emplacement
-		unsigned long				_client_max_body_size; // Taille max des body des requetes acceptees pour cet emplacement
+		std::vector<std::string>	_cgi_path;
+		std::vector<std::string>	_cgi_ext;
+		unsigned long				_client_max_body_size;
 
 	public:
-		std::map<std::string, std::string>	_ext_path;		// key = extension du fichier ; value = path du fichier
+		std::map<std::string, std::string>	_ext_path;
 
 		Location();
 		Location(const Location &other);

@@ -6,35 +6,28 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/12 15:25:15 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/27 12:48:02 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/07/11 13:29:55 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Logger.hpp"
 
 std::string	Logger::file_name = "logfile.txt";
-LogPrio		Logger::prio = ERROR; // seuls les msgs d'erreurs sont journalises
+LogPrio		Logger::prio = ERROR;
 L_State		Logger::state = ON;
 
 std::map<LogPrio, std::string>	Logger::prio_str = initMap();
-
-// Initialise une map associant une priorite de journalisation
-// avec une string representant cette priorite
 
 std::map<LogPrio, std::string>	Logger::initMap()
 {
 	std::map<LogPrio, std::string> p_map;
 
-	// p_map[DEBUG] = "[DEBUG]   ";
 	p_map[DEBUG] = "[INFO]    ";
 	p_map[INFO] = "[DEBUG]    ";
 	p_map[ERROR] = "[ERROR]   ";
 
 	return (p_map);
 }
-
-// Enregistre des messages dans un fichier de log
-// Ou les affichent sur la console
 
 void	Logger::logMsg(const char *color, Mode m, const char *msg, ...)
 {

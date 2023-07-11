@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:05:48 by lsalin            #+#    #+#             */
-/*   Updated: 2023/05/25 10:36:42 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/07/11 13:32:51 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 ServerManager::ServerManager() {}
 ServerManager::~ServerManager() {}
 
-// Initialise tous les serveurs sur les ports spécifiés dans le fichier de configuration
 void	ServerManager::setupServers(std::vector<ServerConfig> servers)
 {
 	std::cout << std::endl;
@@ -23,17 +22,8 @@ void	ServerManager::setupServers(std::vector<ServerConfig> servers)
 
 	_servers = servers;
 
-	// buf = adresse IP du serveur
-	// INET_ADDRSTRLEN = taille max adresse IP Ipv4 (16 caractères)
 	char	buf[INET_ADDRSTRLEN];
-
-	// Indique si un serveur utilise la même IP/port/fd qu'un autre
-	// true = oui --> le fd est déjà attribué au serveur, on attribue le fd du serveur précédent
-	// false = non --> le serveur doit être init avec un nouveau fd
 	bool	serverDub;
-
-	// Première boucle = serveur actuel
-	// Deuxième boucle = serveur précédent
 
 	for (std::vector<ServerConfig>::iterator it = _servers.begin(); it != _servers.end(); ++it)
 	{
@@ -41,11 +31,9 @@ void	ServerManager::setupServers(std::vector<ServerConfig> servers)
 
 		for (std::vector<ServerConfig>::iterator it2 = _servers.begin(); it2 != it; ++it2)
 		{
-			// les deux serveurs ont la même ad et le même port --> ils écoutent sur la même interface réseau
-			// ils doivent donc partager le même fd
 			if (it2->getHost() == it->getHost() && it2->getPort() == it->getPort())
 			{
-				it->setFd(it2->getFd()); // on attribue le fd du serveur précédent au serveur courant
+				it->setFd(it2->getFd());
 				serverDub = true;
 			}
 		}
@@ -53,31 +41,10 @@ void	ServerManager::setupServers(std::vector<ServerConfig> servers)
 		if (!serverDub)
 			it->setupServer();
 
-		// inet_ntop() convertit une adresse IPv4 binaire en une string lisible par l'homme
 		Logger::logMsg(LIGHTMAGENTA, CONSOLE_OUTPUT, "Server Created: ServerName[%s] Host[%s] Port[%d]",it->getServerName().c_str(),
 				inet_ntop(AF_INET, &it->getHost(), buf, INET_ADDRSTRLEN), it->getPort());
 	}
 }
-
-/**
-	@brief Boucle principale du serveur : surveille les fd associés aux serveurs & clients
-	et gére les événements associès à ces fd.
-
-	Check les fd renvoyés par select() :
-
-	1) Lecture :
-		- si server fd --> accepte le nouveau client
-		- si client fd --> le serveur traite la requête du client
-
-	2) Écriture :
-			- si réponse CGI et que le body n'est toujours pas envoyé au processus enfant CGI
-			   --> envoyé le body de la requête au processus enfant du CGI
-			- si réponse CGI et body envoyé --> lire la sortie du processus enfant CGI
-			- si réponse normale --> l'envoyer au client
-
-	Les sockets serveurs/clients sont initialement add à _recv_set_pool.
-	Puis, lorsqu'une requête est entièrement parsée, le socket est déplacé vers _write_set_pool
-*/
 
 void	ServerManager::runServers()
 {
@@ -86,8 +53,8 @@ void	ServerManager::runServers()
 	int		select_ret;
 
 	_biggest_fd = 0;
-	initializeSets(); // initialise l'ensemble des sockets a surveiller
-
+	initializeSets();
+	
 	struct timeval	timer;
 
 	while (true)
@@ -106,34 +73,22 @@ void	ServerManager::runServers()
 
 		for (int i = 0; i <= _biggest_fd; ++i)
 		{
-			// si le fd est prêt pour une opération de lecture et que c'est un fd de serveur
-			// --> on accepte la connexion
 			if (FD_ISSET(i, &recv_set_cpy) && _servers_map.count(i))
 				acceptNewConnection(_servers_map.find(i)->second);
 
-			// si fd de client --> le serveur lit la requête
 			else if (FD_ISSET(i, &recv_set_cpy) && _clients_map.count(i))
 				readRequest(i, _clients_map[i]);
 
-			// écriture
 			else if (FD_ISSET(i, &write_set_cpy) && _clients_map.count(i))
 			{
 				int cgi_state = _clients_map[i].response.getCgiState();
 				
-				// Si cgi_state = 1 --> lecture/écriture à partir du script CGI
-				// Et que que le fd d'entrée du pipe est prêt pour l'écriture
-				// --> on envoie les données au script CGI
 				if (cgi_state == 1 && FD_ISSET(_clients_map[i].response._cgi_obj.pipe_in[1], &write_set_cpy))
 					sendCgiBody(_clients_map[i], _clients_map[i].response._cgi_obj);
 
-				// si fd d'entrée du pipe est prêt pour la lecture
-				// --> on lit la réponse du script CGI
 				else if (cgi_state == 1 && FD_ISSET(_clients_map[i].response._cgi_obj.pipe_out[0], &recv_set_cpy))
 					readCgiResponse(_clients_map[i], _clients_map[i].response._cgi_obj);
 
-				// Si 0 = pas de CGI & 2 = lecture/écriture CGI terminée
-				// Et que fd prêt pour écriture
-				// --> on envoie la réponse au client
 				else if ((cgi_state == 0 || cgi_state == 2)  && FD_ISSET(i, &write_set_cpy))
 					sendResponse(i, _clients_map[i]);
 			}
@@ -141,9 +96,6 @@ void	ServerManager::runServers()
 		checkTimeout();
 	}
 }
-
-// Check le temps ecoule depuis le dernier message du client
-// Si > CONNECTION_TIMEOUT --> close
 
 void	ServerManager::checkTimeout()
 {
@@ -158,16 +110,11 @@ void	ServerManager::checkTimeout()
 	}
 }
 
-// Initialise les ensembles de fd lecture/écriture
-// Et ajoute tous les sockets d'écoute à _recv_fd_pool
-// Utilisée lors de l'initialisation des serveurs
-
 void	ServerManager::initializeSets()
 {
 	FD_ZERO(&_recv_fd_pool);
 	FD_ZERO(&_write_fd_pool);
 
-	// ajoute les sockets des serveurs à l'ensemble de fd _recv_fd_pool
 	for(std::vector<ServerConfig>::iterator it = _servers.begin(); it != _servers.end(); ++it)
 	{
 		if (listen(it->getFd(), 512) == -1)
@@ -176,7 +123,6 @@ void	ServerManager::initializeSets()
 			exit(EXIT_FAILURE);
 		}
 
-		// set le fd en mode non bloquant
 		if (fcntl(it->getFd(), F_SETFL, O_NONBLOCK) < 0)
 		{
 			Logger::logMsg(RED, CONSOLE_OUTPUT, "webserv: fcntl error: %s   Closing....", strerror(errno));
@@ -184,15 +130,12 @@ void	ServerManager::initializeSets()
 		}
 
 		addToSet(it->getFd(), _recv_fd_pool);
-		// associe le fd du serveur à sa config correspondante
 		_servers_map.insert(std::make_pair(it->getFd(), *it));
 	}
-	// _biggest_fd contient à ce stade le fd du dernier serveur crée
+	
 	_biggest_fd = _servers.back().getFd();
 }
 
-// Accepte la nouvelle connexion d'un client
-// Et gère les operations nécessaires pour son ajout à la liste des clients co au serveur
 
 void	ServerManager::acceptNewConnection(ServerConfig &serv)
 {
@@ -223,16 +166,12 @@ void	ServerManager::acceptNewConnection(ServerConfig &serv)
 
 	new_client.setSocket(client_sock);
 
-	// si un client qui a deja une co ouverte essaye de se co a nouveau
-	// --> l'ancienne co est supprimee et remplacee par la nouvelle
-
 	if (_clients_map.count(client_sock) != 0)
 		_clients_map.erase(client_sock);
 
 	_clients_map.insert(std::make_pair(client_sock, new_client));
 }
 
-// Ferme la connexion du fd "i" et supprime l'objet Client associe de _clients_map
 void	ServerManager::closeConnection(const int i)
 {
 	if (FD_ISSET(i, &_write_fd_pool))
@@ -244,11 +183,6 @@ void	ServerManager::closeConnection(const int i)
 	close(i);
 	_clients_map.erase(i);
 }
-
-// Est appelée lorsque le serveur a terminé de construire la réponse HTTP pour une requete client
-// Envoie la reponse au client sur le socket correspondant
-// Si pas d'erreur dans la requete et que le header de Connection == keep-alive --> connexion maintenue
-// Sinon on la close
 
 void	ServerManager::sendResponse(const int &i, Client &c)
 {
@@ -292,11 +226,6 @@ void	ServerManager::sendResponse(const int &i, Client &c)
 	}
 }
 
-// Determine a quel serveur la requete doit etre assignee en fonction de l'adresse IP,
-// du numero de port de la requete et du nom de serveur dans le header de la requete
-// Si une correspondance est trouvee, l'objet Client est m.a.j avec la config du serveur correspondant
-// Sinon il garde la config du serveur precedent auquel il etait assigne
-
 void	ServerManager::assignServer(Client &c)
 {
 	for (std::vector<ServerConfig>::iterator it = _servers.begin(); it != _servers.end(); ++it)
@@ -309,12 +238,6 @@ void	ServerManager::assignServer(Client &c)
 		}
 	}
 }
-
-// Lit les données envoyées par le client connecte sur le socket i
-// Et les envoient au parser
-// Une fois que le parseur a finit son job ou qu'une erreur a ete trouvee dans la requête
-// le socket sera deplace de _recv_fd_pool a _write_fd_pool et la reponse sera envoyée
-// a la prochaine iteration de select()
 
 void	ServerManager::readRequest(const int &i, Client &c)
 {
@@ -344,7 +267,6 @@ void	ServerManager::readRequest(const int &i, Client &c)
 		memset(buffer, 0, sizeof(buffer));
 	}
 
-	// 1 = parsing complet, on peut travailler sur la reponse
 	if (c.request.parsingCompleted() || c.request.errorCode())
 	{
 		assignServer(c);
@@ -354,14 +276,8 @@ void	ServerManager::readRequest(const int &i, Client &c)
 
 		c.buildResponse();
 
-		// la requete necessite l'exe d'un script CGI
-		// Le body de la requete doit etre envoye au script pour traitement
-		// Puis la reponse du script doit etre envoyee au client
-
 		if (c.response.getCgiState())
 		{
-			// le body de la requete est traite et stocke dans une variable tempo
-			// Cette variable est ensuite ecrite dans l'entree du script CGI a travers un pipe
 			handleReqBody(c);
 			addToSet(c.response._cgi_obj.pipe_in[1], _write_fd_pool);
 			addToSet(c.response._cgi_obj.pipe_out[0], _recv_fd_pool);
@@ -372,15 +288,11 @@ void	ServerManager::readRequest(const int &i, Client &c)
 	}
 }
 
-// Est utilisee lorsqu'une requête contenant un body (POST par ex) doit etre traitee par un CGI
 void	ServerManager::handleReqBody(Client &c)
 {
-		// taille du body == 0 --> le body n'est pas lu depuis le socket client
-		// mais est dispo dans un fichier temporaire
-
 		if (c.request.getBody().length() == 0)
 		{
-			std::string			tmp; // stocke temporairement les donnees de la requete
+			std::string			tmp;
 			std::fstream		file;(c.response._cgi_obj.getCgiPath().c_str());
 			std::stringstream	ss;
 
@@ -390,7 +302,6 @@ void	ServerManager::handleReqBody(Client &c)
 		}
 }
 
-// Envoie le corps de la requete au script CGI
 void	ServerManager::sendCgiBody(Client &c, CgiHandler &cgi)
 {
 	int			bytes_sent;
@@ -399,7 +310,6 @@ void	ServerManager::sendCgiBody(Client &c, CgiHandler &cgi)
 	if (req_body.length() == 0)
 		bytes_sent = 0;
 
-	// Le contenu du body est ecrit dans le tube d'entree du processus CGI
 	else if (req_body.length() >= MESSAGE_BUFFER)
 		bytes_sent = write(cgi.pipe_in[1], req_body.c_str(), MESSAGE_BUFFER);
 
@@ -415,7 +325,6 @@ void	ServerManager::sendCgiBody(Client &c, CgiHandler &cgi)
 		c.response.setErrorResponse(500);
 	}
 
-	// tout le contenu du body a ete envoye
 	else if (bytes_sent == 0 || (size_t) bytes_sent == req_body.length())
 	{
 		removeFromSet(cgi.pipe_in[1], _write_fd_pool);
@@ -423,7 +332,6 @@ void	ServerManager::sendCgiBody(Client &c, CgiHandler &cgi)
 		close(cgi.pipe_out[1]);
 	}
 
-	// puis on m.a.j le temps de la derniere activite du client
 	else
 	{
 		c.updateTime();
@@ -431,15 +339,13 @@ void	ServerManager::sendCgiBody(Client &c, CgiHandler &cgi)
 	}
 }
 
-// Lit les outputs produits par le script CGI
 void	ServerManager::readCgiResponse(Client &c, CgiHandler &cgi)
 {
 	char	buffer[MESSAGE_BUFFER * 2];
 	int		bytes_read = 0;
-	// read sur le pipe de sortie du CGI (sortie standard du script)
 	bytes_read = read(cgi.pipe_out[0], buffer, MESSAGE_BUFFER* 2);
 
-	if (bytes_read == 0) // --> plus rien a lire (le CGI a ferme sa sortie standard)
+	if (bytes_read == 0)
 	{
 		removeFromSet(cgi.pipe_out[0], _recv_fd_pool);
 		close(cgi.pipe_in[0]);
@@ -451,7 +357,6 @@ void	ServerManager::readCgiResponse(Client &c, CgiHandler &cgi)
 		if (WEXITSTATUS(status) != 0)
 			c.response.setErrorResponse(502);
 
-		// indique que la reponse a envoyer provient d'un processus CGI
 		c.response.setCgiState(2);
 
 		if (c.response._response_content.find("HTTP/1.1") == std::string::npos)
@@ -482,7 +387,6 @@ void	ServerManager::readCgiResponse(Client &c, CgiHandler &cgi)
 	}
 }
 
-// Ajoute un fd (i) à l'ensemble de fd spécifié (set)
 void	ServerManager::addToSet(const int i, fd_set &set)
 {
 	FD_SET(i, &set);
@@ -491,12 +395,10 @@ void	ServerManager::addToSet(const int i, fd_set &set)
 		_biggest_fd = i;
 }
 
-// Supprime un fd de l'ensemble de fd spécifié
 void	ServerManager::removeFromSet(const int i, fd_set &set)
 {
 	FD_CLR(i, &set);
 
-	// on décrémente _biggest_fd pour garantir que sa valeur reste à jour
 	if (i == _biggest_fd)
 		_biggest_fd--;
 }

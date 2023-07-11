@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 16:49:48 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/17 14:06:50 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/07/11 13:25:44 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,6 @@
 
 HttpRequest::HttpRequest()
 {
-	// "::" pour accéder au champs de l'enum
-
 	_method_str[::GET] = "GET";
 	_method_str[::POST] = "POST";
 	_method_str[::DELETE] = "DELETE";
@@ -47,12 +45,6 @@ HttpRequest::HttpRequest()
 
 HttpRequest::~HttpRequest() {}
 
-/**
-	@brief Verifie la position de l'URI dans la requete (faille "path Traversal")
-
-	@return true si le path contient des ":", sinon false
-*/
-
 bool	checkUriPos(std::string path)
 {
 	std::string	tmp(path);
@@ -72,17 +64,6 @@ bool	checkUriPos(std::string path)
 	return (0);
 }
 
-/**
- @brief Check si les caractères dans l'URI sont autorises, 
- 		Caractères autorisés selon la RFC:
- 
- 		- Alphanumeriques	: A-Z a-z 0-9
- 		- Non réservés		: - _ . ~
- 		- Réservés			: * ' ( ) ; : @ & = + $ , / ? % # [ ]
-
- @return true si le caractère est autorisé, sinon false
- */
-
 bool	allowedCharURI(uint8_t ch)
 {
 	if ((ch >= '#' && ch <= ';') || (ch >= '?' && ch <= '[') || (ch >= 'a' && ch <= 'z') ||
@@ -90,17 +71,6 @@ bool	allowedCharURI(uint8_t ch)
 		return (true);
 	return (false);
 }
-
-/**
- @brief Check si les caractères d'un header field sont autorises, 
- 		Caractères autorisés selon la RFC:
- 
- 		"!" / "#" / "$" / "%" / "&" / "'"
-		"*" / "+" / "-" / "." / "^" / "_"
-		"`" / "|" / "~" / 0-9 / A-Z / a-z
-
- @return true si le caractère est autorisé, sinon false
- */
 
 bool	isToken(uint8_t ch)
 {
@@ -111,7 +81,6 @@ bool	isToken(uint8_t ch)
 	return (false);
 }
 
-// Supprime les espaces en debut et fin de string
 void	trimStr(std::string &str)
 {
 	static const char	*spaces = " \t";
@@ -120,16 +89,11 @@ void	trimStr(std::string &str)
 	str.erase(str.find_last_not_of(spaces) + 1);
 }
 
-// Convertit en minuscule
 void	toLower(std::string &str)
 {
 	for (size_t i = 0; i < str.length(); ++i)
 		str[i] = std::tolower(str[i]);
 }
-
-// Parse le contenu d'une requete HTTP
-// Change d'etat en fonction de l'avance du parsing
-// Si erreur, actualise _error_code
 
 void	HttpRequest::feed(char *data, size_t size)
 {
@@ -142,8 +106,6 @@ void	HttpRequest::feed(char *data, size_t size)
 
 		switch (_state)
 		{
-
-		// GET /hello.txt HTTP/1.1
 
 		case Request_Line:
 		{
@@ -172,8 +134,6 @@ void	HttpRequest::feed(char *data, size_t size)
 			_state = Request_Line_Method;
 			break;
 		}
-
-		// POST/PUT
 
 		case Request_Line_Post_Put:
 		{
@@ -208,9 +168,6 @@ void	HttpRequest::feed(char *data, size_t size)
 				return;
 			}
 
-			// Check si le nombre de caracteres de la methode correspond a ce qui est attendu
-			// Espace apres le nom de methode donc on passe a cet etat
-
 			if ((size_t)_method_index == _method_str[_method].length())
 				_state = Request_Line_First_Space;
 			break;
@@ -228,8 +185,6 @@ void	HttpRequest::feed(char *data, size_t size)
 			_state = Request_Line_URI_Path_Slash;
 			continue;
 		}
-
-		// GET /hello.txt HTTP/1.1 --> /hello.txt
 
 		case Request_Line_URI_Path_Slash:
 		{
@@ -249,8 +204,6 @@ void	HttpRequest::feed(char *data, size_t size)
 			break;
 		}
 
-		// https://www.example.com/search?q=example#results
-
 		case Request_Line_URI_Path:
 		{
 			if (character == ' ')
@@ -261,9 +214,6 @@ void	HttpRequest::feed(char *data, size_t size)
 				continue;
 			}
 
-			// Query permet d'ajouter des parametres supplementaires (optionnel)
-			// L'element est separe par sa valeur avec un "="
-
 			else if (character == '?')
 			{
 				_state = Request_Line_URI_Query;
@@ -271,8 +221,6 @@ void	HttpRequest::feed(char *data, size_t size)
 				_storage.clear();
 				continue;
 			}
-
-			// Fragment permettent de pointer vers une partie specifique de la ressource
 
 			else if (character == '#')
 			{
@@ -361,8 +309,6 @@ void	HttpRequest::feed(char *data, size_t size)
 			break;
 		}
 
-		// HTTP/1.1
-
 		case Request_Line_Ver:
 		{
 			if (checkUriPos(_path))
@@ -421,8 +367,6 @@ void	HttpRequest::feed(char *data, size_t size)
 			_state = Request_Line_HTTP_Slash;
 			break;
 		}
-
-		// HTTP/1.1
 
 		case Request_Line_HTTP_Slash:
 		{
@@ -508,9 +452,6 @@ void	HttpRequest::feed(char *data, size_t size)
 			continue;
 		}
 
-		// Host: localhost:8080
-		// User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64)
-
 		case Field_Name_Start:
 		{
 			if (character == '\r')
@@ -529,7 +470,6 @@ void	HttpRequest::feed(char *data, size_t size)
 			break;
 		}
 
-		// Fin des headers
 		case Fields_End:
 		{
 			if (character == '\n')
@@ -537,8 +477,6 @@ void	HttpRequest::feed(char *data, size_t size)
 				_storage.clear();
 				_fields_done_flag = true;
 				_handle_headers();
-
-				// Si un body est present --> chunk ?
 
 				if (_body_flag == 1)
 				{
@@ -550,8 +488,6 @@ void	HttpRequest::feed(char *data, size_t size)
 						_state = Message_Body;
 					}
 				}
-
-				// Si pas de body --> parsing completed
 
 				else
 				{
@@ -571,8 +507,6 @@ void	HttpRequest::feed(char *data, size_t size)
 			break;
 		}
 
-		// Host: localhost:8080
-
 		case Field_Name:
 		{
 			if (character == ':')
@@ -589,8 +523,6 @@ void	HttpRequest::feed(char *data, size_t size)
 				return;
 			}
 			break;
-			// if (!character allowed)
-			//  error;
 		}
 
 		case Field_Value:
@@ -605,9 +537,6 @@ void	HttpRequest::feed(char *data, size_t size)
 			}
 			break;
 		}
-
-		// '\r' est suivi de '\n' mais on les traite
-		// dans deux case différents
 
 		case Field_Value_End:
 		{
@@ -625,16 +554,6 @@ void	HttpRequest::feed(char *data, size_t size)
 			break;
 		}
 
-		// Host: www.example.com
-		// Transfer-Encoding: chunked
-
-		// 25
-		// This is the data in the first chunk
-			
-		// 1C
-		// and this is the second one
-		// 0
-
 		case Chunked_Length_Begin:
 		{
 			if (isxdigit(character) == 0)
@@ -644,26 +563,19 @@ void	HttpRequest::feed(char *data, size_t size)
 				return;
 			}
 
-			s.str(""); // on vide le contenu du flux de s pour s'assurer qu'il ne contient pas de précédentes valeurs
-			s.clear(); // clear() pour reinit les indicateurs d'erreurs
-			s << character; // on add le caractère lu depuis la requête à notre string
-			
-			// s >> std::hex configure la stringstream pour qu'elle traite 
-			// le texte suivant comme un nombre hexa
-			// s >> _chunk_length extrait l'hexa de la stringstream et le stocke dans _chunk_length
+			s.str("");
+			s.clear();
+			s << character;
 
 			s >> std::hex >> _chunk_length; 
 
 			if (_chunk_length == 0)
 				_state = Chunked_Length_CR;
 			else
-				_state = Chunked_Length; // on continue à lire
+				_state = Chunked_Length;
 
 			continue;
 		}
-
-		// La longueur du chunk est encodée en hexa, donc chaque caractère
-		// est encodé en hexa + rajouté au total de la longueur du chunk
 
 		case Chunked_Length:
 		{
@@ -674,16 +586,12 @@ void	HttpRequest::feed(char *data, size_t size)
 				s.clear();
 				s << character;
 				s >> std::hex >> temp_len;
-				_chunk_length *= 16; // on x16 le nombre hexa pour faire de la place aux bits de poids faible de temp_len
+				_chunk_length *= 16;
 				_chunk_length += temp_len;
 			}
 
 			else if (character == '\r')
 				_state = Chunked_Length_LF;
-
-			// Le caractère n'est ni un hexa ni CR --> fin du chunk
-			// le prochain caractère est le \n suivant
-			// --> on ignore tous les chars jusqu'à ce \n
 
 			else
 				_state = Chunked_Ignore;
@@ -732,9 +640,6 @@ void	HttpRequest::feed(char *data, size_t size)
 				_state = Chunked_Length_LF;
 			continue;
 		}
-
-		// On ajoute le contenu de chaque chunk au body jusqu'à la fin du chunk
-		// Décremente _chunk_length jusqu'à la fin du chunk (== 0)
 
 		case Chunked_Data:
 		{
@@ -804,13 +709,8 @@ void	HttpRequest::feed(char *data, size_t size)
 			continue;
 		}
 
-		// Cas où pas de chunk, donc direct body
-
 		case Message_Body:
 		{
-			// Si la taille du body est < taille totale du body
-			// C'est qu'on doit add le caractère actuellement lu au body
-
 			if (_body.size() < _body_length)
 				_body.push_back(character);
 
@@ -830,9 +730,6 @@ void	HttpRequest::feed(char *data, size_t size)
 		}
 		_storage += character;
 	}
-
-	// Si parsing terminé, on add le contenu du body à body_str
-	// Permet de la traiter + facilement par la suite
 
 	if (_state == Parsing_Done)
 	{
@@ -900,8 +797,6 @@ std::string	&HttpRequest::getBoundary()
 	return (this->_boundary);
 }
 
-// Remplace le contenu de body_str par le body actuel
-
 void	HttpRequest::setBody(std::string body)
 {
 	_body.clear();
@@ -926,20 +821,16 @@ void	HttpRequest::setMaxBodySize(size_t size)
 	_max_body_size = size;
 }
 
-// Affiche le contenu complet de la requête
-
 void	HttpRequest::printMessage()
 {
 	std::cout << _method_str[_method] + " " + _path + "?" + _query + "#" + _fragment
 			  + " " + "HTTP/" << _ver_major  << "." << _ver_minor << std::endl;
 
-	// User-Agent:Mozilla/5.0
 	for (std::map<std::string, std::string>::iterator it = _request_headers.begin(); it != _request_headers.end(); ++it)
 	{
 		std::cout << it->first + ":" + it->second << std::endl;
 	}
 
-	// [72, 101, 108, 108, 111] --> "hello"
 	for (std::vector<u_int8_t>::iterator it = _body.begin(); it != _body.end(); ++it)
 	{
 		std::cout << *it;
@@ -950,18 +841,13 @@ void	HttpRequest::printMessage()
 			  																								<< std::endl;
 }
 
-// Parcourt les headers de la requête pour extraire les choses importantes
-
 void	HttpRequest::_handle_headers()
 {
 	std::stringstream ss;
 
-	// Si Content-Length --> body forcément
 	if (_request_headers.count("content-length"))
 	{
 		_body_flag = true;
-		// Extrait "content-length" du header et la stocke dans le flux
-		// pour ensuite la convertir en entier et la stocker dans _body_length
 		ss << _request_headers["content-length"];
 		ss >> _body_length;
 	}
@@ -973,15 +859,11 @@ void	HttpRequest::_handle_headers()
 		_body_flag = true;
 	}
 
-	// Host: www.example.com
-
 	if (_request_headers.count("host"))
 	{
 		size_t pos = _request_headers["host"].find_first_of(':');
 		_server_name = _request_headers["host"].substr(0, pos);
 	}
-
-	// Content-Type: multipart/form-data; boundary=---------------------------12345abcdef
 
 	if (_request_headers.count("content-type")
 		&& _request_headers["content-type"].find("multipart/form-data") != std::string::npos)
@@ -999,8 +881,6 @@ short	HttpRequest::errorCode()
 {
 	return (this->_error_code);
 }
-
-// Réinitialise les variables pour pouvoir recevoir une nouvelle requête
 
 void HttpRequest::clear()
 {
@@ -1028,16 +908,6 @@ void HttpRequest::clear()
 	_multiform_flag = false;
 }
 
-/**
- @brief Vérifie si le header "Connection" est present dans la requete, et si sa valeur est "close"
-		Si c'est le cas, la connexion doit etre fermee apres la reponse
-		
- @example Connection: keep-alive
-		  Connection: close
-
- @return false si la connexion doit etre fermee, sinon true pour la maintenir
-*/
-
 bool	HttpRequest::keepAlive()
 {
 	if (_request_headers.count("connection"))
@@ -1047,10 +917,6 @@ bool	HttpRequest::keepAlive()
 	}
 	return (true);
 }
-
-// Coupe une partie du body en fonction du nombre de bytes passes en parametre
-// Est utile si on ne veut pas envoyer la requete entiere
-// Par exemple une grande requete qu'on veut envoyer en plusieurs parties
 
 void	HttpRequest::cutReqBody(int bytes)
 {

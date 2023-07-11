@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/05 15:28:18 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/17 15:18:05 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/07/11 13:29:57 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,9 @@ Location::Location()
 	this->_return = "";
 	this->_alias = "";
 	this->_client_max_body_size = MAX_CONTENT_LENGTH;
-	this->_methods.reserve(5);		// 5 méthodes
-	this->_methods.push_back(1);	// GET activée par défaut
-	this->_methods.push_back(0);	// Les 4 autres sont désactivées par défaut
+	this->_methods.reserve(5);
+	this->_methods.push_back(1);
+	this->_methods.push_back(0);
 	this->_methods.push_back(0); 
 	this->_methods.push_back(0);
 	this->_methods.push_back(0);
@@ -211,8 +211,6 @@ const	unsigned long &Location::getMaxBodySize() const
 {
 	return (this->_client_max_body_size);
 }
-
-// Retourne une string représentant les méthodes HTTP autorisées pour l'emplacement
 
 std::string Location::getPrintMethods() const
 {

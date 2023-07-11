@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/07 11:00:47 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/25 14:10:48 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/07/11 13:30:13 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,6 @@
 #include "Webserv.hpp"
 
 class HttpRequest;
-
-// Gere les appels aux scripts CGI
 
 class CgiHandler
 {
@@ -30,12 +28,6 @@ class CgiHandler
 		pid_t								_cgi_pid;
 
 	public:
-
-		// Le script CGI lit les données envoyées par le serveur dans pipe_in[0]
-		// Et écrit ses résultats dans pipe_out[1]
-		// Le serveur lit les données du script dans pipe_out[0]
-		// Et écrit dans pipe_in[1]
-
 		int	pipe_in[2];
 		int	pipe_out[2];
 

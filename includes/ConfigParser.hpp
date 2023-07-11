@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/10 14:11:00 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/20 12:17:13 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/07/11 13:30:17 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,18 +17,14 @@
 
 class ServerConfig;
 
-// Lit et traite le fichier de config pour définir les paramètres
-// de chaque serveurs web créés
-
 class ConfigParser
 {
 	private:
-		std::vector<ServerConfig>	_servers;		// chaque _servers représente une configuration du serveur
-		std::vector<std::string>	_server_config;	// contient des strings représentant le contenu du fichier de config
-		size_t						_nb_server;		// nombre de serveurs configurés
+		std::vector<ServerConfig>	_servers;
+		std::vector<std::string>	_server_config;
+		size_t						_nb_server;
 
 	public:
-
 		ConfigParser();
 		~ConfigParser();
 

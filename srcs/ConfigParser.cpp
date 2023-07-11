@@ -6,7 +6,7 @@
 /*   By: lsalin <lsalin@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/12 13:55:22 by lsalin            #+#    #+#             */
-/*   Updated: 2023/04/20 12:50:27 by lsalin           ###   ########.fr       */
+/*   Updated: 2023/07/11 13:30:02 by lsalin           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,34 +18,6 @@ ConfigParser::ConfigParser()
 }
 
 ConfigParser::~ConfigParser() {}
-
-/**
-	@brief Affiche les configurations des serveurs
-
-	@example	------------- Config -------------
-				Server #1
-				Server name: localhost
-				Host: 127.0.0.1
-				Root: /var/www/html
-				Index: index.html
-				Port: 8080
-				Max BSize: 100000
-				Error pages: 2
-				400 - /var/www/html/error_pages/400.html
-				404 - /var/www/html/error_pages/404.html
-				Locations: 2
-				name location: /
-				methods: GET HEAD POST
-				index: /index.html
-				root: /var/www/html
-				name location: /cgi-bin/
-				methods: GET
-				index: /index.cgi
-				cgi root: /var/www/html
-				cgi_path: 11
-				cgi_ext: 3
-				-----------------------------
- */
 
 int	ConfigParser::print()
 {
@@ -107,9 +79,6 @@ int	ConfigParser::print()
 	return (0);
 }
 
-// Créer un cluster de serveurs à partir d'un fichier de configuration
-// Renvoie (0) si succès, sinon lève une exception
-
 int	ConfigParser::createCluster(const std::string &config_file)
 {
 	std::string		content;
@@ -126,7 +95,6 @@ int	ConfigParser::createCluster(const std::string &config_file)
 	if (content.empty())
 		throw ErrorException("File is empty");
 
-	// clean le fichier de config
 	removeComments(content);
 	removeWhiteSpace(content);
 	splitServers(content);
@@ -147,7 +115,6 @@ int	ConfigParser::createCluster(const std::string &config_file)
 	return (0);
 }
 
-// Supprime les commentaires du fichier de config (de "#" à "\n")
 void	ConfigParser::removeComments(std::string &content)
 {
 	size_t	pos;
@@ -162,7 +129,6 @@ void	ConfigParser::removeComments(std::string &content)
 	}
 }
 
-// Supprime les whitespaces en début/fin de string, et dans le contenu s'il y en a plus d'un
 void	ConfigParser::removeWhiteSpace(std::string &content)
 {
 	size_t	i = 0;
@@ -178,25 +144,6 @@ void	ConfigParser::removeWhiteSpace(std::string &content)
 
 	content = content.substr(0, i + 1);
 }
-
-/**
-	@brief Divise les différentes configs en configs distinctes
-
-	@example	server
-				{
-    				host example.com;
-    				port 8080;
-				}
-
-				server
-				{
-    				host example.org;
-    				port 80;
-				}
-
-			--> _server_config[0] = "server {\n    host example.com;\n    port 8080;\n}\n"
-				_server_config[1] = "server {\n    host example.org;\n    port 80;\n}\n"
- */
 
 void	ConfigParser::splitServers(std::string &content)
 {
@@ -220,9 +167,6 @@ void	ConfigParser::splitServers(std::string &content)
 		start = end + 1;
 	}
 }
-
-// Trouve la position de début de configuration du serveur ('{')
-// Retourne la position du premier '{'
 
 size_t	ConfigParser::findStartServer(size_t start, std::string &content)
 {
@@ -276,7 +220,6 @@ size_t	ConfigParser::findEndServer (size_t start, std::string &content)
 	return (start);
 }
 
-// Divise une string en fonction d'un séparateur
 std::vector<std::string>	splitParametrs(std::string line, std::string sep)
 {
 	std::vector<std::string>	str;
@@ -303,25 +246,11 @@ std::vector<std::string>	splitParametrs(std::string line, std::string sep)
 
 void	ConfigParser::createServer(std::string &config, ServerConfig &server)
 {
-	std::vector<std::string>	parametrs;		// paramètres de config
-	std::vector<std::string>	error_codes;	// codes d'erreurs du serveur
-	int							flag_loc = 1;	// true = on est en train de traiter les paramètres d'un emplacement
+	std::vector<std::string>	parametrs;
+	std::vector<std::string>	error_codes;
+	int							flag_loc = 1;
 	bool						flag_autoindex = false;
 	bool						flag_max_size = false;
-
-		// listen 8080;
-		// server_name localhost;
-		// root /var/www/html/;
-		// index index.html;
-
-// -->	// parametrs[0] = "listen"
-		// parametrs[1] = "8080;"
-		// parametrs[2] = "server_name"
-		// parametrs[3] = "localhost;"
-		// parametrs[4] = "root"
-		// parametrs[5] = "/var/www/html/;"
-		// parametrs[6] = "index"
-		// parametrs[7] = "index.html;"
 
 	parametrs = splitParametrs(config += ' ', std::string(" \n\t"));
 
@@ -332,7 +261,7 @@ void	ConfigParser::createServer(std::string &config, ServerConfig &server)
 	{
 		if (parametrs[i] == "listen" && (i + 1) < parametrs.size() && flag_loc)
 		{
-			if (server.getPort()) // si port déjà défini
+			if (server.getPort())
 				throw  ErrorException("Port is duplicated");
 			server.setPort(parametrs[++i]);
 		}
@@ -460,7 +389,6 @@ void	ConfigParser::createServer(std::string &config, ServerConfig &server)
 		throw ErrorException("Incorrect path for error page or number of error");
 }
 
-// Renvoie (0) si les strings correspondent, sinon (1)
 int	ConfigParser::stringCompare(std::string str1, std::string str2, size_t pos)
 {
 	size_t	i;
@@ -476,9 +404,6 @@ int	ConfigParser::stringCompare(std::string str1, std::string str2, size_t pos)
 		return (0);
 	return (1);
 }
-
-// Check si deux serveurs ont les mêmes paramètres de configs (même host etc.)
-// Lève une exception si c'est le cas
 
 void	ConfigParser::checkServers()
 {
