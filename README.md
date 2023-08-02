@@ -6,7 +6,7 @@ Le projet Webserv consiste à écrire un serveur HTTP en C++98, qui sera capable
 
 Ce projet est très formateur car il permet de comprendre en profondeur comment fonctionne un serveur web et comment les données sont échangées entre un client et un serveur.
 
-De nombreuses notions importantes de programmation seront étudiées à travers ce projet comme les __sockets__, la __programmation multiplexée__ via l'utilisation de `select()` , ou encore l'implémentation d'un __CGI__.
+De nombreuses notions importantes de programmation seront étudiées à travers ce projet comme les __sockets__, la __programmation multiplexée__ via l'utilisation de `select()`, ou encore l'implémentation d'un __CGI__.
 
 __Comment tester le programme__ ?
 
