@@ -10,7 +10,7 @@ De nombreuses notions importantes de programmation seront étudiées à travers 
 
 __Comment tester le programme__ ?
 
-* `make` a la racine.
+* Exécuter la commande make à la racine du répertoire.
 * Exécutez `./webserv`. Votre serveur est maintenant prêt à accepter des connexions de la part de `http://localhost:8002`.
 * Tapez `http://localhost:8002` dans votre navigateur et visitez notre site web !
 * Gardez un œil sur le terminal pour observer les requêtes entre le client et le serveur.
@@ -25,7 +25,7 @@ Many important notions of programming will be studied through this project such 
 
 __How to test the program__?
 
-* `make` at root.
+* Execute the `make` command at the root of the directory.
 * Run `./webserv`. Your server is now ready to accept connections from `http://localhost:8002`.
 * Type `http://localhost:8002` in your browser and visit our website!
 * Keep an eye on the terminal to observe requests between client and server.
